@@ -229,7 +229,7 @@ class RememberMe extends ProcessingFilter
      *
      * @param mixed $request
      */
-    public function process(&$request)
+    public function process(array &$state): void
     {
         $uid_attribute = Configuration::getOptionalConfig('module_campusmultiauth.php')
             ->getConfigItem('remember_me', [])
