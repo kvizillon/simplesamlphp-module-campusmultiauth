@@ -42,7 +42,7 @@ class Campusidp extends Source
     // Cookie related constants
     public const COOKIE_PREFIX = 'campusidp_';
     public const COOKIE_PREVIOUS_IDPS = 'previous_idps';
-    private const int COOKIE_LIFETIME = 7776000; // 90 days in seconds
+    private const COOKIE_LIFETIME = 7776000; // 90 days in seconds
 
     // IdP hinting constants
     public const IDPHINT = 'idphint';
@@ -63,8 +63,8 @@ class Campusidp extends Source
     public const EQUALS = 'equals';
     public const MATCHES = 'matches';
 
-    private const string ENTITY_CATEGORY_ATTR_NAME = 'http://macedir.org/entity-category';
-    private const string ASSURANCE_CERTIFICATION_ATTR_NAME = 'urn:oasis:names:tc:SAML:attribute:assurance-certification';
+    private const ENTITY_CATEGORY_ATTR_NAME = 'http://macedir.org/entity-category';
+    private const ASSURANCE_CERTIFICATION_ATTR_NAME = 'urn:oasis:names:tc:SAML:attribute:assurance-certification';
     public const IDP_HINT_BUTTONS_LIMIT = 5;
 
     /** @var array<int, array{source: string, AuthnContextClassRef: array}> */
