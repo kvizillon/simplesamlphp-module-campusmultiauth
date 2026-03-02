@@ -6,7 +6,7 @@
     {% set configuration = configuration|merge({'priority': 'secondary'}) %}
 {% endif %}
 
-<form id="external-{{ component_index }}" class="external text-left" action="{{ currentUrl }}" method="post" name="g">
+<form id="external-{{ component_index }}" class="external text-left" action="{{ moduleURL('campusmultiauth/selectsource.php') }}" method="post" name="g">
 
     <h4 class="mb-3 {% if muni_jvs %}color-{{ configuration.priority }}{% elseif configuration.priority == 'primary' %}text-dark{% else %}text-muted{% endif %}" >
         {% if attribute(configuration.title, currentLanguage) is defined %}{{ attribute(configuration.title, currentLanguage) }}
