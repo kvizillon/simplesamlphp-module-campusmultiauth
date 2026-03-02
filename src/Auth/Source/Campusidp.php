@@ -32,40 +32,40 @@ use Transliterator;
 class Campusidp extends Source
 {
     // State and session keys
-    public const string AUTHID = '\SimpleSAML\Module\campusidp\Auth\Source\Campusidp.AuthId';
-    public const string STAGEID_USERPASS = '\SimpleSAML\Module\core\Auth\UserPassBase.state';
-    public const string SOURCESID = '\SimpleSAML\Module\campusidp\Auth\Source\Campusidp.SourceId';
-    public const string SESSION_SOURCE = 'campusmultiauth:selectedSource';
-    public const string USER_PASS_SOURCE_NAME = 'userPassSourceName';
-    public const string SP_SOURCE_NAME = 'spSourceName';
+    public const AUTHID = '\SimpleSAML\Module\campusidp\Auth\Source\Campusidp.AuthId';
+    public const STAGEID_USERPASS = '\SimpleSAML\Module\core\Auth\UserPassBase.state';
+    public const SOURCESID = '\SimpleSAML\Module\campusidp\Auth\Source\Campusidp.SourceId';
+    public const SESSION_SOURCE = 'campusmultiauth:selectedSource';
+    public const USER_PASS_SOURCE_NAME = 'userPassSourceName';
+    public const SP_SOURCE_NAME = 'spSourceName';
 
     // Cookie related constants
-    public const string COOKIE_PREFIX = 'campusidp_';
-    public const string COOKIE_PREVIOUS_IDPS = 'previous_idps';
+    public const COOKIE_PREFIX = 'campusidp_';
+    public const COOKIE_PREVIOUS_IDPS = 'previous_idps';
     private const int COOKIE_LIFETIME = 7776000; // 90 days in seconds
 
     // IdP hinting constants
-    public const string IDPHINT = 'idphint';
-    public const string AARC_IDP_HINT = 'aarc_idp_hint';
-    public const string AARC_DISCOVERY_HINT = 'aarc_discovery_hint';
-    public const string AARC_DISCOVERY_HINT_URI = 'aarc_discovery_hint_uri';
+    public const IDPHINT = 'idphint';
+    public const AARC_IDP_HINT = 'aarc_idp_hint';
+    public const AARC_DISCOVERY_HINT = 'aarc_discovery_hint';
+    public const AARC_DISCOVERY_HINT_URI = 'aarc_discovery_hint_uri';
 
     // Metadata filtering constants
-    public const string INCLUDE = 'include';
-    public const string EXCLUDE = 'exclude';
-    public const string ALL_OF = 'all_of';
-    public const string ANY_OF = 'any_of';
-    public const string ENTITY_CATEGORY = 'entity_category';
-    public const string ASSURANCE_CERTIFICATION = 'assurance_certification';
-    public const string REGISTRATION_AUTHORITY = 'registration_authority';
-    public const string ENTITYID = 'entityid';
-    public const string CONTAINS = 'contains';
-    public const string EQUALS = 'equals';
-    public const string MATCHES = 'matches';
+    public const INCLUDE = 'include';
+    public const EXCLUDE = 'exclude';
+    public const ALL_OF = 'all_of';
+    public const ANY_OF = 'any_of';
+    public const ENTITY_CATEGORY = 'entity_category';
+    public const ASSURANCE_CERTIFICATION = 'assurance_certification';
+    public const REGISTRATION_AUTHORITY = 'registration_authority';
+    public const ENTITYID = 'entityid';
+    public const CONTAINS = 'contains';
+    public const EQUALS = 'equals';
+    public const MATCHES = 'matches';
 
     private const string ENTITY_CATEGORY_ATTR_NAME = 'http://macedir.org/entity-category';
     private const string ASSURANCE_CERTIFICATION_ATTR_NAME = 'urn:oasis:names:tc:SAML:attribute:assurance-certification';
-    public const int IDP_HINT_BUTTONS_LIMIT = 5;
+    public const IDP_HINT_BUTTONS_LIMIT = 5;
 
     /** @var array<int, array{source: string, AuthnContextClassRef: array}> */
     private array $sources;
