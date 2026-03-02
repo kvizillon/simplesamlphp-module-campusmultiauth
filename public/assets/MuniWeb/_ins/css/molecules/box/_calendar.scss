@@ -1,0 +1,90 @@
+.ins-box-calendar {
+	&__header {
+		border-bottom: 1px solid $borderPrimary;
+		position: relative;
+		overflow: hidden;
+	}
+	&__nav {
+		width: 40px;
+		height: 40px;
+		position: absolute;
+		top: 0;
+		font-size: 14px;
+		background-color: #fff;
+		border: 0 solid $borderPrimary;
+		opacity: 0;
+		visibility: hidden;
+		transition: opacity .2s, visibility .2s;
+		&.is-visible {
+			opacity: 1;
+			visibility: visible;
+		}
+		.icon {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			margin: -7px 0 0 -2px;
+		}
+		&--prev {
+			left: 0;
+			border-right-width: 1px;
+		}
+		&--next {
+			right: 0;
+			border-left-width: 1px;
+		}
+	}
+	&__menu-list {
+		@extend %reset-ul;
+		display: flex;
+		overflow-x: auto;
+		white-space: nowrap;
+		margin-bottom: -15px;
+	}
+	&__menu-item {
+		@extend %reset-ul-li;
+	}
+	&__menu-item + &__menu-item {
+		border-left: 1px solid $borderPrimary;
+	}
+	&__menu-link {
+		font-size: 14px;
+		font-weight: bold;
+		text-decoration: none;
+		display: block;
+		padding: 10px 20px;
+		&.is-active {
+			color: $color;
+		}
+	}
+	&__body {
+		padding: 20px;
+		font-size: 14px;
+		> :last-child {
+			margin-bottom: 0;
+		}
+	}
+	&__list {
+		@extend %reset-ul;
+	}
+	&__item {
+		@extend %reset-ul-li;
+		margin-bottom: 10px;
+		padding-bottom: 10px;
+		border-bottom: 1px solid #dcdcdc;
+	}
+	&__item-meta {
+		display: block;
+		small {
+			font-size: 12px;
+			font-weight: bold;
+			color: #aaa;
+		}
+	}
+
+	@media (min-width: $mobileL) {
+		&__body {
+			padding: 30px;
+		}
+	}
+}

@@ -1,0 +1,43 @@
+.ins-box-summary {
+	background-color: $primary;
+	color: #fff;
+	margin-bottom: $mMarginSmall / 2;
+	text-align: center;
+	padding: 20px;
+	> :last-child {
+		margin-bottom: 0;
+	}
+	&__count {
+		font-family: $fontMuni;
+		font-weight: bold;
+		font-size: 26px;
+		line-height: (56/46);
+		margin-bottom: 5px;
+		position: relative;
+		padding-right: 28px;
+		.icon {
+			font-size: 20px;
+			vertical-align: middle;
+			position: absolute;
+			top: 50%;
+			margin-left: 8px;
+			&:first-child {
+				margin-top: -10px;
+			}
+		}
+	}
+	&__title {
+		font-weight: bold;
+	}
+	&--red {
+		background-color: $crimson;
+	}
+
+	@media (min-width: $tablet) {
+		padding: 40px;
+		margin-bottom: $mMarginSmall;
+		&__count {
+			font-size: 46px;
+		}
+	}
+}

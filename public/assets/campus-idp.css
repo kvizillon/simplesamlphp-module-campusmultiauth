@@ -1,0 +1,536 @@
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  background-color: #ffffff;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.social {
+  width: 100%;
+  padding-left: 5%;
+  padding-right: 5%;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.input {
+  width: 100%;
+}
+
+.metaentry {
+  width: 100%;
+  text-align: left;
+}
+
+.metaentry:hover {
+  background-image: none;
+}
+
+.metaentry:focus {
+  outline: none;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.text-center {
+  text-align: center;
+}
+
+.preferred-row {
+  margin-bottom: 10px;
+}
+
+.framework_muni .wrap {
+  margin: 0 24px 0 24px;
+}
+
+.btn-individual-identity {
+  width: 100%;
+}
+
+.framework_bootstrap5 .btn-individual-identity {
+  text-align: left;
+  padding: 0;
+  margin-bottom: 12px;
+}
+
+.more-options {
+  border-bottom: 1px solid #0000dc;
+  margin-bottom: 24px;
+}
+
+.remembered-institution {
+  margin-top: 12px !important;
+}
+
+.framework_bootstrap5 .list-group-item + .list-group-item {
+  border-top-width: 1px;
+}
+
+.framework_bootstrap5 .more-options {
+  margin-top: -24px;
+}
+
+.framework_muni .external {
+  margin-bottom: 24px;
+}
+
+.external {
+  margin-bottom: 12px;
+}
+
+.header-text {
+  margin: 36px;
+  text-align: left;
+}
+
+.framework_muni .header-text {
+  margin: 24px;
+}
+
+.remove-option {
+  float: right;
+  margin-right: 10px;
+}
+
+.header-img {
+  object-fit: contain;
+  max-width: 100%;
+  max-height: 50px;
+}
+
+.hrline {
+  width: 100%;
+  height: 15px;
+  border-bottom: 1px solid #757575;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.hrline span {
+  padding: 0 20px;
+}
+
+.framework_muni .hrline span {
+  background-color: #ffffff;
+}
+
+.security-image {
+  object-fit: scale-down;
+  margin: calc(1em - 25px) auto 1em;
+  display: block;
+  max-width: 500px;
+  max-height: 150px;
+}
+
+.individual-identity-logo {
+  width: 50px;
+  height: 50px;
+  padding: 10px;
+}
+
+.framework_muni .individual-identity-logo {
+  border-right: 2px solid #757575;
+}
+
+.individual-identity-span-wrap.individual-identity-span-wrap {
+  text-align: left;
+  padding: 0;
+}
+
+.remember-me-times {
+  right: 5%;
+  top: 40%;
+}
+
+.idp-text {
+  margin-bottom: 0;
+  margin-left: 25px;
+}
+
+.margin-left-24 {
+  margin-left: 24px;
+}
+
+#layout {
+  width: 100%;
+  text-align: center;
+}
+
+.local-password-btn-wrap {
+  text-align: right;
+  padding: 0;
+}
+
+.footer-margin {
+  margin: 0 auto;
+  max-width: 1000px;
+}
+
+.color-primary {
+  color: #000000;
+}
+
+.color-border-primary.color-border-primary {
+  border: 2px solid #000000;
+}
+
+.color-primary.color-primary > span {
+  color: #000000;
+  border-color: #000000;
+}
+
+.color-secondary {
+  color: #757575;
+}
+
+.color-border-secondary.color-border-secondary {
+  border: 2px solid #757575;
+}
+
+.color-secondary.color-secondary > span {
+  color: #757575;
+  border-color: #757575;
+}
+
+.margin-bottom-24 {
+  margin-bottom: 24px;
+}
+
+.margin-bottom-12 {
+  margin-bottom: 12px;
+}
+
+.margin-top-12 {
+  margin-top: 12px;
+}
+
+.margin-top-48 {
+  margin-top: 48px;
+}
+
+.margin-left-12 {
+  margin-left: 12px;
+}
+
+.framework_muni .language-bar-margin {
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+
+.text-bold {
+  font-weight: bold;
+}
+
+.col-padding-0 {
+  padding-left: 0;
+}
+
+.selectize-input.selectize-input {
+  border: none;
+  line-height: 28px;
+}
+
+.selectize-input.focus {
+  border-color: #0000dc;
+}
+
+.hover-none-primary:hover.hover-none-primary:hover.hover-none-primary:hover
+  > span {
+  background: #ffffff;
+  border-color: #ffffff;
+  color: #0000dc;
+}
+
+.hover-none-secondary:hover.hover-none-secondary:hover.hover-none-secondary:hover
+  > span {
+  background: #ffffff;
+}
+
+.searchbox-result.searchbox-result {
+  color: #000000;
+  background-color: #ffffff;
+  font-weight: normal;
+}
+
+.searchbox-result:hover.searchbox-result:hover {
+  background-color: #eeeeee;
+}
+
+.framework_bootstrap5 .selectize-input.items.not-full:after {
+  content: "\f002";
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  top: 6px;
+  right: 12px;
+  text-rendering: auto;
+  font-variant: normal;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  border-width: 0;
+  margin: auto 0;
+  width: auto;
+  height: auto;
+}
+
+.framework_muni .selectize-control.single .selectize-input::after {
+  display: none;
+}
+
+.selectize-dropdown:after,
+.selectize-dropdown:before {
+  display: none;
+}
+
+.input-height {
+  line-height: 28px;
+}
+
+.framework_bootstrap5 .list-group-item.active {
+  background-color: #eeeeee;
+  border-color: #eeeeee;
+  color: #000000;
+}
+
+.img-searchbox {
+  height: 50px;
+  width: 50px;
+  object-fit: cover;
+  object-position: left;
+}
+
+.preferred-idp {
+  text-align: left;
+  width: 100%;
+  background-color: white;
+}
+
+.preferred-idp:hover {
+  background-color: #eeeeee;
+}
+
+.footer {
+  padding: 0 18px 36px 36px;
+}
+
+.framework_muni .footer {
+  padding: 0 12px 0 6px;
+}
+
+.primary-contrast-color {
+  color: #ffffff;
+}
+
+.secondary-contrast-color {
+  color: #ffffff;
+}
+
+.selectize-dropdown-content.selectize-dropdown-content {
+  max-height: 400px;
+}
+
+.text-left {
+  text-align: left;
+}
+
+#wrong_user_pass {
+  text-align: center;
+}
+
+#username.hidden {
+  display: none;
+}
+
+#content {
+  margin: 0 36px 24px 36px;
+}
+
+.framework_muni #content {
+  border: 1px solid #757575;
+  margin: 0 24px 0 24px;
+}
+
+.framework_muni #toggle-password {
+  object-fit: contain;
+  right: 0;
+  top: 0;
+  padding: 12px 16px 11px 16px;
+  margin-top: 1px;
+  border-left: 2px solid #000000;
+  line-height: 28px;
+}
+
+#submit_button {
+  margin: 0;
+  width: 100%;
+}
+
+#refresh-required-dialog {
+  text-align: center;
+}
+
+.idps-form-div {
+  margin-top: 0;
+  margin-bottom: 24px;
+}
+
+.idps-form-nojs {
+  width: 100%;
+  margin-top: 0;
+  margin-bottom: 24px;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.wrap-col {
+  padding: 0 0 0;
+}
+
+.first-col {
+  padding-top: 24px;
+}
+
+.solid {
+  border-style: solid;
+}
+
+@media screen and (min-width: 768px) {
+  .wrap {
+    margin: 0 0 36px 0;
+  }
+
+  .framework_muni .wrap {
+    margin: 0 0 36px 20px;
+  }
+
+  .wrap-col {
+    padding: 18px 36px 0;
+  }
+
+  .window {
+    display: inline-block;
+    width: 90%;
+    margin-bottom: 72px;
+    box-shadow: rgba(0, 0, 0, 0.15) 0 1rem 3rem 0.5rem;
+  }
+
+  .framework_muni .header-text {
+    margin: 72px 36px 36px;
+  }
+
+  .header-wrap {
+    margin-left: 15%;
+    margin-right: 15%;
+  }
+
+  .header {
+    margin-bottom: 100px;
+  }
+
+  .grid__cell {
+    border-left: 0;
+  }
+
+  .framework_muni #content .size--m--2-4:not(:first-child) {
+    border-left: 1px solid #757575;
+  }
+
+  .framework_muni #content .size--m--2-4:not(:last-child) {
+    border-right: 1px solid #757575;
+    margin-right: -1px;
+  }
+
+  .framework_bootstrap5 #content .col-md-6:not(:first-child) {
+    border-left: 1px solid #757575;
+  }
+
+  .framework_bootstrap5 #content .col-md-6:not(:last-child) {
+    border-right: 1px solid #757575;
+    margin-right: -1px;
+  }
+
+  .last-col-component {
+    display: none;
+  }
+
+  .footer {
+    padding: 0 0 36px 36px;
+  }
+
+  .framework_muni .footer {
+    padding: 0 12px 36px 5%;
+  }
+
+  .framework_muni #content {
+    margin: 0;
+    border: none;
+  }
+
+  .framework_bootstrap5 .more-options {
+    margin-top: -12px;
+  }
+
+  .security-image {
+    margin-top: calc(1em - 60px);
+  }
+
+  #content {
+    margin: 0;
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  .window {
+    width: 921px;
+  }
+
+  .framework_muni .footer {
+    padding: 0 12px 72px 90px;
+  }
+}
+
+@media screen and (min-width: 2048px) {
+  .header {
+    margin-bottom: 200px;
+  }
+}
+
+.border-muted {
+  border-color: #6c757d !important;
+}
+
+.framework_muni #password {
+  padding-right: 54px;
+}
+
+h4 {
+  font-size: var(--bs-body-font-size) !important;
+  font-weight: bold;
+}
+
+.framework_muni .header .grid {
+  width: 100%;
+}
+
+@media screen and (min-width: 700px) {
+  .framework_muni .header .grid__cell:first-child {
+    text-align: right;
+  }
+
+  .framework_muni .header .grid__cell:last-child {
+    text-align: left;
+  }
+}

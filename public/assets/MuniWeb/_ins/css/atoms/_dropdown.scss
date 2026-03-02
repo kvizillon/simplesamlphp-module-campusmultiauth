@@ -1,0 +1,57 @@
+.ins-dropdown {
+	position: relative;
+	&__menu {
+		position: absolute;
+		top: 100%;
+		right: -10px;
+		width: 320px;
+		background-color: #fff;
+		border: 1px solid $borderPrimary;
+		z-index: 1000;
+		margin-top: 12px;
+		opacity: 0;
+		visibility: hidden;
+		transition: opacity .2s, visiiblity .2s;
+		&::before,
+		&::after {
+			content: '';
+			position: absolute;
+			bottom: 100%;
+			right: 20px;
+			width: 0;
+			height: 0;
+			border-style: solid;
+			border-width: 0 8px 8px 8px;
+			border-color: transparent;
+		}
+		&::before {
+			border-bottom-color: $borderPrimary;
+		}
+		&::after {
+			border-bottom-color: #fff;
+			margin-bottom: -1px;
+		}
+	}
+	&__divider {
+		margin: 0;
+		height: 0;
+	}
+	&.is-opened &__menu {
+		opacity: 1;
+		visibility: visible;
+	}
+
+	@media (max-width: $mobileL - 1) {
+
+		.ins-box-widget__actions &:nth-child(2n + 1) &__menu {
+			right: auto;
+			left: -10px;
+
+			&::before,
+			&::after {
+				right: auto;
+				left: 20px;
+			}
+		}
+	}
+}

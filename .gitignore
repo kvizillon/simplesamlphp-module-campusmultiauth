@@ -1,0 +1,70 @@
+## System files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+*.log
+*.stackdump
+
+## IDE files
+.idea/
+.vscode/
+*.sublime-*
+.project
+.classpath
+*.iml
+*.iws
+*.ipr
+.netrwhist
+
+## Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+.#*
+*.bak
+*.old
+*.orig
+
+## Composer
+/vendor/
+composer.phar
+/composer.lock
+
+## Build artifacts
+/build/
+/dist/
+/out/
+
+## Configuration files with secrets
+.env
+.env.local
+.env.*.local
+*.secret
+
+## Logs
+*.log
+logs/
+log/
+*.pid
+*.seed
+*.pid.lock
+
+## OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.lnk
+
+## Other temporary and system files
+*.class
+*.jar
+*.war
+*.ear
+*.db
+*.sqlite

@@ -1,0 +1,196 @@
+.ins-box-settings {
+	> :last-child {
+		margin-bottom: 0;
+	}
+	&__table {
+		font-size: 14px;
+
+		th {
+			padding: 0 10px 20px;
+		}
+		td {
+			padding: 5px 0;
+		}
+
+		tbody tr {
+			transition: background-color .2s;
+			@include hover() {
+				&:hover {
+					background-color: #F2F2FD;
+					.ins-box-settings__drag {
+						color: $color;
+					}
+					.ins-box-settings__edit {
+						.text-icon__icon {
+							opacity: 1;
+						}
+					}
+				}
+			}
+		}
+
+		tfoot {
+			font-weight: inherit;
+			font-size: inherit;
+		}
+
+		tr.is-active {
+			background-color: #F2F2FD;
+
+			> td {
+				> :last-child {
+					margin-bottom: 0;
+				}
+			}
+
+			.ins-box-settings__table {
+				td {
+					border: 0;
+				}
+			}
+
+		}
+		.grid__cell {
+			font-size: 14px;
+		}
+	}
+
+	&__drag {
+		text-align: center;
+		color: $greyDark;
+		transition: color .2s, opacity .2s;
+	}
+
+
+	@media (max-width: $tablet - 1) {
+		&__table {
+			thead {
+				display: none;
+			}
+
+			tbody tr {
+				display: block;
+				padding: 5px 10px;
+
+				&:not(:last-child) {
+					border-bottom: 2px solid $borderLight;
+				}
+			}
+
+			tfoot {
+				display: block;
+			}
+
+			tfoot tr {
+				display: block;
+				border-top: 2px solid $borderLight;
+				padding: 10px 10px 0 10px;
+			}
+
+			tr.is-active {
+				.ins-box-settings__table {
+					tr {
+						border: 0;
+						padding: 0;
+					}
+				}
+			}
+
+			.grid {
+				margin-bottom: -10px;
+			}
+			.grid__cell {
+				margin-bottom: 10px;
+			}
+
+			td {
+				display: block;
+				text-align: left;
+				position: relative;
+				border: 0;
+				word-break: break-word;
+
+				&:empty {
+					display: none;
+				}
+			}
+
+			[data-before] {
+				padding-left: 85px;
+				&::before {
+					content: attr(data-before)":";
+					position: absolute;
+					top: 50%;
+					left: 0;
+					width: 80px;
+					font-weight: bold;
+					transform: translateY(-50%);
+				}
+			}
+
+			.inp-fix {
+				max-width: 350px;
+			}
+		}
+
+		&__lvl-2 {
+			margin-left: 20px;
+		}
+
+		&__table &__drag {
+			display: none;
+		}
+	}
+
+	@media (min-width: $tablet) {
+		&__table {
+			table-layout: fixed;
+
+			td {
+				padding: 5px 10px;
+				height: 41px;
+			}
+
+			th,
+			td {
+				vertical-align: middle;
+				&:first-child {
+					padding-left: 15px;
+				}
+				&:last-child {
+					padding-right: 20px;
+				}
+			}
+
+			tr.is-active {
+				> td {
+					padding: 5px 0 20px;
+				}
+				.ins-box-settings__table {
+					td {
+						padding-top: 10px;
+						padding-bottom: 10px;
+					}
+				}
+				.ins-box-settings__drag {
+					opacity: 0;
+				}
+			}
+		}
+		&__lvl-2 {
+			th,
+			td {
+				&:first-child {
+					padding-left: 30px;
+				}
+			}
+		}
+
+		&__edit {
+			.text-icon__icon {
+				opacity: 0;
+				transition: opacity .2s;
+			}
+		}
+	}
+}

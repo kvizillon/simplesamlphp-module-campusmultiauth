@@ -1,0 +1,140 @@
+{% if configuration.priority is not defined %}
+    {% set configuration = configuration|merge({'priority': 'secondary'}) %}
+{% endif %}
+
+<form id="userpass" action="{{ currentUrl }}" method="post" name="f">
+
+    <h4 class="mb-3 text-left {% if muni_jvs %}color-{{ configuration.priority }}{% elseif configuration.priority == 'primary' %}text-dark{% else %}text-muted{% endif %}">
+        {% if attribute(configuration.title, currentLanguage) is defined %}{{ attribute(configuration.title, currentLanguage) }}
+        {% elseif configuration.title is defined and configuration.title is iterable and configuration.title is not empty %}{{ configuration.title | first }}
+        {% elseif configuration.title is defined and configuration.title is not iterable %}{{ configuration.title }}
+        {% else %}{{ '{campusmultiauth:localLogin_title}'|trans }}
+        {% endif %}
+    </h4>
+
+    {% if securityImage is defined %}
+        <img src='{{ securityImage|escape('html_attr') }}' class='security-image' alt='{{ alternativeText|default('')|escape('html_attr') }}'>
+    {% elseif alternativeText is defined %}
+        <p class="security-image-text">{{ alternativeText|escape }}</p>
+    {% endif %}
+
+    {% if wrongUserPass == true %}
+        {% if muni_jvs %}
+            <div class="message message--error" role="alert">
+                <span class="message__icon icon icon-exclamation-triangle"></span>
+                <p class="message__desc red">
+                    {{ '{campusmultiauth:wrong_username_or_password}'|trans }}
+                </p>
+            </div>
+        {% else %}
+            <div id="wrong_user_pass" class="alert alert-danger bg-white" role="alert">
+                {{ '{campusmultiauth:wrong_username_or_password}'|trans }}
+            </div>
+        {% endif %}
+    {% endif %}
+
+    <div class="margin-bottom-24 text-left{% if wrongUserPass and muni_jvs %} error{% endif %}">
+        {% if userInfo is same as false %}
+            <label for="username" class="{% if muni_jvs %}color-{{ configuration.priority }}{% else %}form-label text-{% if configuration.priority == 'primary' %}dark{% else %}muted{% endif %}{% endif %}">
+                {% if attribute(configuration.username_label, currentLanguage) is defined %}{{ attribute(configuration.username_label, currentLanguage) }}
+                {% elseif configuration.username_label is defined and configuration.username_label is iterable and configuration.username_label is not empty %}{{ configuration.username_label | first }}
+                {% elseif configuration.username_label is defined and configuration.username_label is not iterable %}{{ configuration.username_label }}
+                {% else %}{{ '{campusmultiauth:username_label}'|trans }}
+                {% endif %}
+            </label>
+            <br>
+            {% if muni_jvs %}<span class="inp-fix">{% endif %}
+                <input id="username" class="{% if muni_jvs %}inp-text input-height border color-border-{{ configuration.priority }}{% else %}input-height form-control shadow-sm border-2{% if wrongUserPass %} is-invalid{% else %} border-{% if configuration.priority == 'primary' %}dark{% else %}muted{% endif %}{% endif %}{% endif %}"
+                       type="text"{% if autofocus == 'username' %} autofocus{% endif%}  name="username" placeholder="{% if attribute(configuration.username_placeholder, currentLanguage) is defined %}{{ attribute(configuration.username_placeholder, currentLanguage) }}
+                    {% elseif configuration.username_placeholder is defined and configuration.username_placeholder is iterable and configuration.username_placeholder is not empty %}{{ configuration.username_placeholder | first }}
+                    {% elseif configuration.username_placeholder is defined and configuration.username_placeholder is not iterable %}{{ configuration.username_placeholder }}
+                    {% else %}{{ '{campusmultiauth:username_placeholder}'|trans }}
+                    {% endif %}" required>
+            {% if muni_jvs %}</span>{% endif %}
+        {% else %}
+            <div class="{% if muni_jvs %}box-bg box-bg--white-border u-pt-30 u-pb-30 inp-fix inp-icon inp-icon--after color-border-{{ configuration.priority }}{% else %}border-2 solid py-4 ps-4 position-relative {% if configuration.priority == 'primary' %}border-dark{% else %}border-muted{% endif %}{% endif %}">
+                <strong id="remembered-name">{{ userInfo.name|escape }}</strong>
+                <br>
+                <small>{{ uidName }} {{ username|escape }}</small>
+                <input class="hidden" readonly name="username" id="username" autocomplete="username" value="{{ username }}" />
+                {% if forceUsername is not defined or not forceUsername %}
+                    <a {% if not muni_jvs %}class="position-absolute remember-me-times"{% endif%}href="{{ differentUsername }}" title="{{ '{campusmultiauth:different_account}'|trans }}">
+                        {% if muni_jvs %}
+                            <span class="icon icon-times"></span>
+                        {% else %}
+                            <i class="fas fa-times"></i>
+                        {% endif %}
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+    <div class="margin-bottom-24 text-left{% if wrongUserPass and muni_jvs %} error{% endif %}">
+        <label for="password" class="{% if muni_jvs %}color-{{ configuration.priority }}{% else %}form-label text-{% if configuration.priority == 'primary' %}dark{% else %}muted{% endif %}{% endif %}">
+            {% if attribute(configuration.password_label, currentLanguage) is defined %}{{ attribute(configuration.password_label, currentLanguage) }}
+            {% elseif configuration.password_label is defined and configuration.password_label is iterable and configuration.password_label is not empty %}{{ configuration.password_label | first }}
+            {% elseif configuration.password_label is defined and configuration.password_label is not iterable %}{{ configuration.password_label }}
+            {% else %}{{ '{campusmultiauth:password_label}'|trans }}
+            {% endif %}
+        </label>
+        <br>
+        {% if muni_jvs %}
+            <span class="inp-fix inp-icon inp-icon--after" id="capslock-warning-wrapper">
+        {% else %}
+            <div class="input-group">
+        {% endif %}
+            <input id="password"
+               {% if muni_jvs %}
+                   class="inp-text input-height border color-border-{{ configuration.priority }}"
+               {% else %}
+                   {% if configuration.priority == 'primary' %}
+                       class="form-control shadow-sm border-2 input-height{% if wrongUserPass %} is-invalid{% else %} border-dark{% endif %}"
+                   {% else %}
+                       class="form-control shadow-sm border-2 input-height{% if wrongUserPass %} is-invalid{% else %} border-muted{% endif %}"
+                   {% endif %}
+               {% endif %}
+                   type="password" name="password"{% if autofocus == 'password' %} autofocus{% endif %} autocomplete="current-password" placeholder="{% if attribute(configuration.password_placeholder, currentLanguage) is defined %}{{ attribute(configuration.password_placeholder, currentLanguage) }}
+                {% elseif configuration.password_placeholder is defined and configuration.password_placeholder is iterable and configuration.password_placeholder is not empty %}{{ configuration.password_placeholder | first }}
+                {% elseif configuration.password_placeholder is defined and configuration.password_placeholder is not iterable %}{{ configuration.password_placeholder }}
+                {% else %}{{ '{campusmultiauth:password_placeholder}'|trans }}
+                {% endif %}" required>
+            <button id="toggle-password" class="{% if muni_jvs %}btn-icon icon icon-eye color-{{ configuration.priority }}{% else %}btn border border-2 border-{% if configuration.priority == 'primary' %}dark{% else %}muted{% endif %} rounded-end{% endif %}" type="button">{% if not muni_jvs %}<i class="fas fa-eye"></i>{% endif %}</button>
+            {% if muni_jvs %}<span class="inp-info vhide" id="capslock-warning">{{ '{campusmultiauth:localLogin_capslock}'|trans }}</span>{% else %}<div class="invalid-feedback text-warning d-block d-none" id="capslock-warning">{{ '{campusmultiauth:localLogin_capslock}'|trans }}</div>{% endif %}
+        {% if muni_jvs %}
+            </span>
+        {% else %}
+            </div>
+        {% endif %}
+    </div>
+
+    {% if rememberme_enabled and userInfo is same as false %}
+        <div class="margin-bottom-24 text-left">
+            {% if muni_jvs %}
+                <label class="inp-item inp-item--checkbox" for="remember_me">
+                    <input id="remember_me" type="checkbox"{% if dontRemember is same as false and rememberme_checked is same as true %} checked{% endif %} name="remember_me" value="Yes">
+                    <span>{{ '{campusmultiauth:remember}'|trans }}</span>
+                </label>
+                <input type="hidden" id="dont_remember_me" name="dont_remember_me" value="{% if dontRemember is same as true or rememberme_checked is same as false %}Yes{% endif %}" />
+            {% else %}
+                <input type="checkbox" class="form-check-input border{% if configuration.priority == 'primary' %} border-dark{% else %} border-muted{% endif %}" id="remember_me" name="remember_me" value="Yes">
+                <label class="form-check-label margin-left-12 text-{% if configuration.priority == 'primary' %}dark{% else %}muted{% endif %}" for="remember_me">{{ '{campusmultiauth:remember}'|trans }}</label>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <div class="margin-bottom-24{% if not rememberme_enabled or userInfo is not same as false %} margin-top-48{% endif %}" id="submit">
+        {% if muni_jvs %}
+            <button id="submit_button" class="btn {% if wayf_config.muni_faculty is defined %}btn-{{ wayf_config.muni_faculty }}{% else %}btn-primary {% endif %}{% if configuration.priority == 'secondary' %}btn-border{% endif %} btn-lg" type="submit">
+                <span>
+                    <span class="font-muni">{{ '{campusmultiauth:login}'|trans }}</span>
+                </span>
+            </button>
+        {% else %}
+            <button id="submit_button" class="btn btn-{{ configuration.priority }} btn-lg shadow-sm" type="submit">
+                {{ '{campusmultiauth:login}'|trans }}
+            </button>
+        {% endif %}
+    </div>
+    <input type="hidden" id="authstate" name="authstate" value="{{ authstate }}" />
+    <input type="hidden" id="source" name="source" value="{{ user_pass_source_name }}" />
+</form>

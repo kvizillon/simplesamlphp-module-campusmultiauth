@@ -1,0 +1,118 @@
+{% if wayf_config is defined and wayf_config.languages is not defined %}
+    {% set wayf_config = wayf_config|merge({'languages': {'en': 'English'}}) %}
+{% endif %}
+
+{% if muni_jvs %}
+    <header class="header">
+        <div class="row-main header__wrap">
+            <div class="grid">
+                <div class="grid__cell size--m--2-4 push--m--2-4 center">
+                    <div class="header__side">
+                        {% if wayf_config.languages | length > 2 %}
+                            <nav class="menu-lang menu-lang--select" aria-label="{{ '{campusmultiauth:lang_selection}'|trans }}">
+                                <p class="menu-lang__selected">
+                                    {% if attribute(wayf_config.languages, currentLanguage) is defined %}
+                                        <a href="#" class="menu-lang__selected__link">
+                                            {{ attribute(wayf_config.languages, currentLanguage) }}
+                                        </a>
+                                    {% endif %}
+                                </p>
+                                <p class="menu-lang__popup">
+                                    {% for langKey, langName in wayf_config.languages %}
+                                        {% if langKey != currentLanguage and currentUrl ~ "&language=" ~ langKey %}
+                                            <a href="{{ currentUrl ~ "?language=" ~ langKey }}{%- for name, value in queryParams %}{{ "&" ~ name ~ "=" ~ value }}{%- endfor %}"
+                                               rel="alternate" hreflang="{{ langKey }}" lang="{{ langKey }}" class="menu-lang__popup__link">
+                                                {{ langName }}
+                                            </a>
+                                        {% endif %}
+                                    {% endfor %}
+                                </p>
+                            </nav>
+                        {% else %}
+                            <nav class="menu-lang" aria-label="{{ '{campusmultiauth:lang_selection}'|trans }}">
+                                <p class="menu-lang__selected">
+                                    {% for langKey, langName in wayf_config.languages %}
+                                        {% if langKey != currentLanguage and currentUrl ~ "&language=" ~ langKey %}
+                                            <a href="{{ currentUrl ~ "?language=" ~ langKey }}{%- for name, value in queryParams %}{{ "&" ~ name ~ "=" ~ value }}{%- endfor %}"
+                                               rel="alternate" hreflang="{{ langKey }}" lang="{{ langKey }}" class="menu-lang__selected__link">
+                                                {{ langName }}
+                                            </a>
+                                        {% endif %}
+                                    {% endfor %}
+                                </p>
+                            </nav>
+                        {% endif %}
+                        <nav class="menu-mobile" aria-label="{{ '{campusmultiauth:mobile_lang_selection}'|trans }}">
+                            <div class="menu-mobile__wrap">
+                                <div class="row-main">
+                                    <ul class="menu-mobile__list">
+                                        {% set counter = 0 %}
+                                        {% for langKey, langName in wayf_config.languages %}
+                                            {% if counter < 5 and langKey != currentLanguage and currentUrl ~ "&language=" ~ langKey %}
+                                                <li class="menu-mobile__item">
+                                                    <a href="{{ currentUrl ~ "?language=" ~ langKey }}{%- for name, value in queryParams %}{{ "&" ~ name ~ "=" ~ value }}{%- endfor %}"
+                                                       rel="alternate" hreflang="{{ langKey }}" lang="{{ langKey }}" class="menu-mobile__link menu-mobile__link--lang">
+                                                        {{ langKey|upper }}
+                                                    </a>
+                                                </li>
+                                                {% set counter = counter + 1 %}
+                                            {% endif %}
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </nav>
+                    </div>
+                </div>
+                <div class="grid__cell size--m--2-4 pull--m--2-4 center">
+                    <img src="{% if wayf_config.logo is defined %}{{ wayf_config.logo }}{% endif %}" class="header-img" alt="{% if wayf_config.name is defined %}{{ wayf_config.name }}{% endif %}"/>
+                </div>
+            </div>
+        </div>
+    </header>
+{% elseif wayf_config is defined %}
+    <header class="header border-top border-primary border-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 order-md-last text-md-end">
+                    {% if wayf_config.languages | length > 2 %}
+                        <div class="dropdown language-bar mt-3">
+                            <a id="dropdown-language" class="btn btn-secondary dropdown-toggle text-primary bg-white border-0" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                {% if attribute(wayf_config.languages, currentLanguage) is defined %}
+                                    <span class="d-md-none">{{ currentLanguage | upper }}</span><span class="d-none d-md-inline">{{ attribute(wayf_config.languages, currentLanguage) }}</span>
+                                {% else %}
+                                    {{ currentLanguage | upper }}
+                                {% endif %}
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="dropdown-language">
+                                {% for langKey, langName in wayf_config.languages %}
+                                    {% if langKey != currentLanguage %}
+                                        <li>
+                                            <a class="dropdown-item text-primary" href="{{ currentUrl ~ "?language=" ~ langKey }}{%- for name, value in queryParams %}{{ "&" ~ name ~ "=" ~ value }}{%- endfor %}">
+                                                <span class="d-md-none">{{ langKey | upper }}</span><span class="d-none d-md-inline">{{ langName }}</span>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% else %}
+                        <p class="language-bar mt-3">
+                            {% for langKey, langName in wayf_config.languages %}
+                                {% if langKey != currentLanguage and currentUrl ~ "&language=" ~ langKey %}
+                                    <a href="{{ currentUrl ~ "?language=" ~ langKey }}{%- for name, value in queryParams %}{{ "&" ~ name ~ "=" ~ value }}{%- endfor %}"
+                                       rel="alternate" hreflang="{{ langKey }}" lang="{{ langKey }}" class="text-decoration-none text-primary">
+                                        <span class="d-md-none">{{ langKey | upper }}</span><span class="d-none d-md-inline">{{ langName }}</span>
+                                    </a>
+                                {% endif %}
+                            {% endfor %}
+                        </p>
+                    {% endif %}
+                </div>
+                <div class="col-md-6 order-md-first text-md-start">
+                    <img src="{% if wayf_config.logo is defined %}{{ wayf_config.logo }}{% endif %}" class="header-img mt-3" alt="{% if wayf_config.name is defined %}{{ wayf_config.name }}{% endif %}"/>
+                </div>
+            </div>
+        </div>
+    </header>
+{% endif %}

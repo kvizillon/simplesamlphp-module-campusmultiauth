@@ -1,0 +1,50 @@
+{% if muni_jvs is not defined %}
+    {% set muni_jvs = false %}
+{% endif %}
+{% apply spaceless %}
+<!DOCTYPE html>
+<html lang="{{ currentLanguage }}" xml:lang="{{ currentLanguage }}">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="initial-scale=1.0">
+    <title>{{ pagetitle }}</title>
+    {# skip default CSS, favicon and JavaScript #}
+    <meta name="robots" content="noindex, nofollow">
+    {% block preload %}
+      {% if muni_jvs %}
+        <link rel="stylesheet" type="text/css" href="/{{baseurlpath}}module.php/campusmultiauth/assets/MuniWeb/css/style{% if wayf_config.muni_faculty is defined%}-{{ wayf_config.muni_faculty }}{% endif %}.css" />
+      {% else %}
+        <link href="/{{baseurlpath}}module.php/campusmultiauth/assets/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+      {% endif %}
+    {% endblock %}
+  </head>
+  <body id="{{ templateId }}" class="{% if muni_jvs %}framework_muni{% else %}framework_bootstrap5{% endif %}">
+    <div id="layout">
+      {% block header %}{% include "_header.twig" %}{% endblock %}
+      {% block contentwrapper %}
+        <div id="content">
+            <div class="wrap">
+              {% block content %}{% endblock %}
+            </div>
+        </div>{# content #}
+      {% endblock contentwrapper %}
+      <div id="push"></div>
+    </div>{# layout #}
+    {% if restart_url is defined %}
+        {% block timeoutDialog %}{% include '@campusmultiauth/includes/timeout-dialog.twig' %}{% endblock %}
+    {% endif %}
+    <div id="foot">
+      {% block footer %}{% include "_footer.twig" %}{% endblock %}
+    </div>
+    {% block postload %}
+      {% if muni_jvs %}
+        <script src="/{{baseurlpath}}module.php/campusmultiauth/assets/jquery-3.6.0.min.js"></script>
+        <script src="/{{baseurlpath}}module.php/campusmultiauth/assets/MuniWeb/js/app.js"></script>
+        <script src="/{{baseurlpath}}module.php/campusmultiauth/assets/campus-idp-muni.js"></script>
+      {% else %}
+        <script src="/{{baseurlpath}}module.php/campusmultiauth/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+      {% endif %}
+    {% endblock %}
+  </body>
+</html>
+{% endapply %}

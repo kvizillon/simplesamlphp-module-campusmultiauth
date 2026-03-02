@@ -1,0 +1,43 @@
+.ins-avatar{
+	position: absolute;
+	right: 0;
+	top: 0;
+	margin-bottom: 0;
+	&__link{
+		text-decoration: none;
+		display: block;
+		overflow: hidden;
+		width: 40px;
+		height: 40px;
+		border-radius: 50%;
+		border: 1px solid rgba($border, .5);
+		img{
+			vertical-align: top;
+			position: relative;
+			top: -3px;
+		}
+	}
+	&__noimg{
+		font-size: 18px;
+		display: block;
+		font-family: $fontMuni;
+		background: $muni;
+		color: #fff;
+		text-align: center;
+		line-height: 40px;
+		padding: 0;
+	}
+	@media(max-width: $desktopWide - 1){
+		&__link{
+			width: 30px;
+			height: 30px;
+		}
+		&__noimg{
+			font-size: 14px;
+			width: 30px;
+			height: 30px;
+			line-height: 30px;
+			padding: 0 2px 0 0;
+		}
+	}
+}

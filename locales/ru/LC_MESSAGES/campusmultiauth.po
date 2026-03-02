@@ -1,0 +1,83 @@
+msgid "{campusmultiauth:wrong_user_pass}"
+msgstr "Wrong username or password!"
+
+msgid "{campusmultiauth:password}"
+msgstr "Пароль"
+
+msgid "{campusmultiauth:login_title}"
+msgstr "Логин"
+
+msgid "{campusmultiauth:remember}"
+msgstr "Remember me"
+
+msgid "{campusmultiauth:login}"
+msgstr "Log in"
+
+msgid "{campusmultiauth:sign_in_with}"
+msgstr "Log in with"
+
+msgid "{campusmultiauth:sign_in_another_identity}"
+msgstr "Login via institution or social network"
+
+msgid "{campusmultiauth:or}"
+msgstr "or"
+
+msgid "{campusmultiauth:lang_selection}"
+msgstr "Language selection"
+
+msgid "{campusmultiauth:mobile_lang_selection}"
+msgstr "Mobile language selection"
+
+msgid "{campusmultiauth:username_label}"
+msgstr "Username"
+
+msgid "{campusmultiauth:username_placeholder}"
+msgstr "Username"
+
+msgid "{campusmultiauth:password_label}"
+msgstr "Пароль"
+
+msgid "{campusmultiauth:password_placeholder}"
+msgstr "Пароль"
+
+msgid "{campusmultiauth:searchbox_title}"
+msgstr "Log in via another institution"
+
+msgid "{campusmultiauth:searchbox_placeholder}"
+msgstr "Type the name of institution"
+
+msgid "{campusmultiauth:individualIdentities_title}"
+msgstr "Log in via institution or social network"
+
+msgid "{campusmultiauth:more_options}"
+msgstr "More options"
+
+msgid "{campusmultiauth:wrong_username_or_password}"
+msgstr "Wrong username or password."
+
+msgid "{campusmultiauth:search_button}"
+msgstr "Search"
+
+msgid "{campusmultiauth:undefined}"
+msgstr "undefined"
+
+msgid "{campusmultiauth:localLogin_title}"
+msgstr "Login with username and password"
+
+msgid "{campusmultiauth:localLogin_capslock}"
+msgstr "Warning! Caps lock is ON."
+
+msgid "{campusmultiauth:close}"
+msgstr "close"
+
+msgid "{campusmultiauth:otp_help}"
+msgstr "Enter a one time code, e.g. from a TOTP app."
+
+msgid "{campusmultiauth:timeout_dialog}"
+msgstr "Because of inactivity, it is needed to refresh the page."
+
+msgid "{campusmultiauth:refresh}"
+msgstr "refresh"
+
+msgid "{campusmultiauth:different_account}"
+msgstr "Use a different account to log in"

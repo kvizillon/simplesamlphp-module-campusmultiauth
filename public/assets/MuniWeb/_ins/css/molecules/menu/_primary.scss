@@ -1,0 +1,27 @@
+.ins-menu-primary{
+	.menu-primary__main-toggle{
+		.ins-menu-mega{
+			margin-bottom: 0;
+		}
+		.ins-menu-mega__head{
+			display: none;
+		}
+		.menu-subbox__title{
+			margin-bottom: 0;
+		}
+		.menu-subbox__subtitle{
+			margin-top: 20px;
+		}
+		.menu-subbox__toggle{
+			&:before{
+				display: none;
+			}
+		}
+		.menu-subbox__list{
+			margin-bottom: 0;
+		}
+		.menu-subbox__box{
+			padding-bottom: 10px;
+		}
+	}
+}

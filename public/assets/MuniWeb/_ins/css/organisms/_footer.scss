@@ -1,0 +1,13 @@
+.ins-footer {
+	padding-top: 30px;
+	padding-bottom: 10px;
+	border-bottom: 0;
+	margin-top: 10px;
+
+	@media (min-width: $tablet) {
+		margin-top: 40px;
+		.footer__share {
+			margin: 5px 0 20px;
+		}
+	}
+}

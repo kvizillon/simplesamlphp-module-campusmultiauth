@@ -1,0 +1,52 @@
+$s: '.ins-crossroad-profile';
+
+.ins-crossroad-profile{
+	margin-bottom: $mMargin;
+	&__list{
+		@extend %reset-ul;
+		@extend %grid;
+		margin: 0 0 -10px -10px;
+	}
+	&__item{
+		@extend %reset-ul-li;
+		@extend %grid__cell;
+		width: 100%;
+		border-left: 10px solid transparent;
+		margin-bottom: 10px;
+	}
+	&__link{
+		display: block;
+		font-size: 18px;
+		background: $muni;
+		padding: 35px 50px 35px 75px;
+		color: #fff;
+		text-decoration: none;
+		position: relative;
+		.icon{
+			font-size: 28px;
+			position: absolute;
+			left: 30px;
+			top: 50%;
+			margin-top: -14px;
+		}
+		@include hover() {
+			&:hover {
+				text-decoration: underline;
+				color: #fff;
+			}
+		}
+	}
+
+	@media (min-width: $tablet){
+		&__item{
+			width: 50%;
+		}
+		&__link{
+			padding: 35px 75px;
+		}
+	}
+
+	@media (min-width: $desktop){
+		display: none;
+	}
+}

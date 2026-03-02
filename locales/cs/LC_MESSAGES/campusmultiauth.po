@@ -1,0 +1,83 @@
+msgid "{campusmultiauth:wrong_user_pass}"
+msgstr "Chybné uživatelské jméno nebo heslo!"
+
+msgid "{campusmultiauth:password}"
+msgstr "Heslo"
+
+msgid "{campusmultiauth:login_title}"
+msgstr "Přihlášení"
+
+msgid "{campusmultiauth:remember}"
+msgstr "Zapamatovat si mě"
+
+msgid "{campusmultiauth:login}"
+msgstr "Přihlásit"
+
+msgid "{campusmultiauth:sign_in_with}"
+msgstr "Přihlásit přes"
+
+msgid "{campusmultiauth:sign_in_another_identity}"
+msgstr "Přihlášení přes cizí identitu"
+
+msgid "{campusmultiauth:or}"
+msgstr "nebo"
+
+msgid "{campusmultiauth:lang_selection}"
+msgstr "Výběr jazyka"
+
+msgid "{campusmultiauth:mobile_lang_selection}"
+msgstr "Výběr jazyka mobil"
+
+msgid "{campusmultiauth:username_label}"
+msgstr "Uživatelské jméno"
+
+msgid "{campusmultiauth:username_placeholder}"
+msgstr "Uživatelské jméno"
+
+msgid "{campusmultiauth:password_label}"
+msgstr "Heslo"
+
+msgid "{campusmultiauth:password_placeholder}"
+msgstr "Heslo"
+
+msgid "{campusmultiauth:searchbox_title}"
+msgstr "Přihlášení přes jinou instituci"
+
+msgid "{campusmultiauth:searchbox_placeholder}"
+msgstr "Začněte psát název instituce"
+
+msgid "{campusmultiauth:individualIdentities_title}"
+msgstr "Přihlášení přes instituci nebo sociální síť"
+
+msgid "{campusmultiauth:more_options}"
+msgstr "Více možností"
+
+msgid "{campusmultiauth:wrong_username_or_password}"
+msgstr "Špatné uživatelské jméno nebo heslo."
+
+msgid "{campusmultiauth:search_button}"
+msgstr "Vyhledat"
+
+msgid "{campusmultiauth:undefined}"
+msgstr "neznámé"
+
+msgid "{campusmultiauth:localLogin_title}"
+msgstr "Přihlášení uživatelským jménem a heslem"
+
+msgid "{campusmultiauth:localLogin_capslock}"
+msgstr "Pozor, máte zapnutý Caps lock."
+
+msgid "{campusmultiauth:close}"
+msgstr "zavřít"
+
+msgid "{campusmultiauth:otp_help}"
+msgstr "Vložte jednorázový kód, například z TOTP aplikace."
+
+msgid "{campusmultiauth:timeout_dialog}"
+msgstr "Z důvodu neaktivity je nutné stránku obnovit."
+
+msgid "{campusmultiauth:refresh}"
+msgstr "obnovit"
+
+msgid "{campusmultiauth:different_account}"
+msgstr "Přihlásit se jiným účtem"

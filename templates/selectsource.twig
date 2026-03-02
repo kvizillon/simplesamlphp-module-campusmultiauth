@@ -1,0 +1,89 @@
+{% extends "base.twig" %}
+
+{% block preload %}
+    {% if muni_jvs %}
+        <link rel="stylesheet" type="text/css" href="/{{baseurlpath}}module.php/campusmultiauth/assets/selectize/css/selectize.css" />
+    {% else %}
+        <link rel="stylesheet" type="text/css" href="/{{baseurlpath}}module.php/campusmultiauth/assets/font_awesome/css/all.css" />
+        <link rel="stylesheet" type="text/css" href="/{{baseurlpath}}module.php/campusmultiauth/assets/selectize/css/selectize.bootstrap5.css" />
+    {% endif %}
+    {{ parent() }}
+    <link rel="stylesheet" type="text/css" href="/{{baseurlpath}}module.php/campusmultiauth/assets/campus-idp.css" />
+    <meta name="searchbox-indexes" content="{{searchbox_indexes}}">
+    <meta name="searchbox-placeholders" content="{{searchbox_placeholders}}">
+    <meta name="searchbox-default" content="{{ '{campusmultiauth:searchbox_placeholder}'|trans }}">
+{% endblock %}
+
+{% block postload %}
+    {{ parent() }}
+    <script src="/{{baseurlpath}}module.php/campusmultiauth/assets/jquery-3.6.0.min.js"></script>
+    <script src="/{{baseurlpath}}module.php/campusmultiauth/assets/selectize/js/standalone/selectize.min.js"></script>
+
+    {% if idphint is not defined %}{% set idphint = [] %}{% endif %}
+    <meta name="idphint" content="{{ idphint | json_encode }}">
+
+    {% if aarc_discovery_hint is not defined %}{% set aarc_discovery_hint = [] %}{% endif %}
+    <meta name="aarc_discovery_hint" content="{{ aarc_discovery_hint | json_encode }}">
+
+    {% if aarc_discovery_hint_uri is not defined %}{% set aarc_discovery_hint_uri = '' %}{% endif %}
+    <meta name="aarc_discovery_hint_uri" content="{{ aarc_discovery_hint_uri | json_encode }}">
+
+    <script type="module" src="/{{baseurlpath}}module.php/campusmultiauth/assets/campus-idp.js"></script>
+{% endblock %}
+
+{% block contentwrapper %}
+    <div class="window {% if muni_jvs %}framework_muni{% else %}framework_bootstrap5 bg-light{% endif %}">
+        <h3 class="header-text">
+            {{ '{campusmultiauth:login_title}'|trans }}
+        </h3>
+        <div id="content">
+            <div class="wrap{% if not muni_jvs %} container{% endif %}">
+                {% block content %}
+                    <div class="{% if muni_jvs %}grid{% else %}row{% endif %}">
+                        <div class="{% if muni_jvs %}grid__cell size--m--2-4 first-col{% else %}col-md-6{% endif %} wrap-col">
+                            {% if hint_component_config is defined and hint_component_config.name == 'individual_identities' %}
+                                {% include '@campusmultiauth/includes/individual-identities.twig' with {'configuration': hint_component_config, 'component_index': 0} %}
+                            {% else %}
+                                {% for component_configuration in wayf_config.components %}
+                                    {% if component_configuration.name == 'local_login' and (idpsToShow is not defined or component_configuration.entityid in idpsToShow) %}
+                                        {% include '@campusmultiauth/includes/local-login.twig' with {'configuration': component_configuration} %}
+                                    {% elseif component_configuration.name == 'individual_identities' and (individual_identities_to_display is not defined or loop.index0 in individual_identities_to_display) %}
+                                        {% include '@campusmultiauth/includes/individual-identities.twig' with {'configuration': component_configuration, 'component_index': loop.index0} %}
+                                    {% elseif component_configuration.name == 'searchbox' and (searchboxes_to_display is not defined or loop.index0 in searchboxes_to_display) %}
+                                        {% include '@campusmultiauth/includes/searchbox.twig' with {'configuration': component_configuration, 'component_index': loop.index0} %}
+                                    {% endif %}
+
+                                    {% if component_configuration.end_col is defined and component_configuration.end_col %}
+                                        </div>
+                                        <div class="{% if muni_jvs %}grid__cell size--m--2-4{% else %}col-md-6{% endif %} wrap-col">
+                                    {% endif %}
+
+                                    {% if not loop.last and (component_configuration.end_col is not defined or component_configuration.end_col != true) and (or_positions is not defined or loop.index0 in or_positions) %}
+                                        <div class="hrline color-secondary">
+                                            <span{% if not muni_jvs %} class="bg-light"{% endif %}>{{ '{campusmultiauth:or}'|trans }}</span>
+                                        </div>
+                                    {% elseif not loop.last and (component_configuration.end_col is defined and component_configuration.end_col == true) %}
+                                        <div class="hrline last-col-component color-secondary">
+                                            <span{% if not muni_jvs %} class="bg-light"{% endif %}>{{ '{campusmultiauth:or}'|trans }}</span>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endblock %}
+            </div>
+        </div>
+        {% if not muni_jvs %}
+            <div id="foot">
+              {% include "_footer.twig" %}
+            </div>
+        {% endif %}
+    </div>
+{% endblock contentwrapper %}
+
+{% block footer %}
+  {% if muni_jvs %}
+    {{ parent() }}
+  {% endif %}
+{% endblock %}

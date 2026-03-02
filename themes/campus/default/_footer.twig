@@ -1,0 +1,45 @@
+{% if wayf_config.footer is defined and wayf_config.footer.sections is defined %}
+    {% if muni_jvs %}
+        {% if attribute(wayf_config.footer.sections, currentLanguage) is defined %}
+            {% set colSize = 4 / attribute(wayf_config.footer.sections, currentLanguage) | length %}
+        {% else %}
+            {% set colSize = 4 / wayf_config.footer.sections | length %}
+        {% endif %}
+    {% else %}
+        {% if attribute(wayf_config.footer.sections, currentLanguage) is defined %}
+            {% set colSize = 12 / attribute(wayf_config.footer.sections, currentLanguage) | length %}
+        {% else %}
+            {% set colSize = 12 / wayf_config.footer.sections | length %}
+        {% endif %}
+    {% endif %}
+
+    <footer class="footer text-left{% if not muni_jvs %} bg-secondary secondary-contrast-color{% endif %}">
+        <div class="{% if muni_jvs %}grid{% else %}row{% endif%} footer-margin">
+            {% if attribute(wayf_config.footer.sections, currentLanguage) is defined %}
+                {% for block in attribute(wayf_config.footer.sections, currentLanguage) %}
+                    {% if wayf_config.footer.format is defined and (wayf_config.footer.format == 'HTML' or wayf_config.footer.format == 'markdown') %}
+                        <div class="{% if muni_jvs %}grid__cell size--m--{{ colSize }}-4{% else %}col-padding-0 col-md-{{ colSize }}{% endif %}">
+                            {{ block | raw }}
+                        </div>
+                    {% else %}
+                        <div class="{% if muni_jvs %}grid__cell size--m--{{ colSize }}-4{% else %}col-padding-0 col-md-{{ colSize }}{% endif %}">
+                            {{ block }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                {% for block in wayf_config.footer.sections %}
+                    {% if wayf_config.footer.format is defined and (wayf_config.footer.format == 'HTML' or wayf_config.footer.format == 'markdown') %}
+                        <div class="{% if muni_jvs %}grid__cell size--m--{{ colSize }}-4{% else %}col-padding-0 col-md-{{ colSize }}{% endif %}">
+                            {{ block | raw }}
+                        </div>
+                    {% else %}
+                        <div class="{% if muni_jvs %}grid__cell size--m--{{ colSize }}-4{% else %}col-padding-0 col-md-{{ colSize }}{% endif %}">
+                            {{ block }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        </div>
+    </footer>
+{% endif %}

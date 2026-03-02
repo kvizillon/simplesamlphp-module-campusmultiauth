@@ -1,0 +1,13 @@
+html #useWebAuthnButton,
+html #usePushButton,
+html #useOTPButton,
+html #useU2FButton,
+html #submitButton {
+  margin: 0;
+  width: auto;
+}
+
+html #otp {
+  margin: 0;
+  width: 100%;
+}

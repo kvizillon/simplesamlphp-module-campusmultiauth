@@ -1,0 +1,30 @@
+.ins-box-food-menu {
+	@include clearfix();
+	font-size: 14px;
+	
+	&__list {
+		@extend %reset-ul;
+	}
+	&__item {
+		@extend %reset-ul-li;
+		display: flex;
+	}
+	&__item + &__item {
+		margin-top: 10px;
+	}
+	&__price {
+		font-weight: bold;
+		margin-left: auto;
+		padding: 2px 0 2px 15px;
+		white-space: nowrap;
+	}
+
+	@media (min-width: $tablet) {
+		padding-left: 160px;
+		&__img {
+			width: 130px;
+			margin: 0 0 0 -160px;
+			float: left;
+		}
+	}
+}

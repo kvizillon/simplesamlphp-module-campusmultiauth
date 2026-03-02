@@ -1,0 +1,43 @@
+.ins-box-article {
+	@include clearfix();
+	margin-bottom: $mMarginSmall;
+	&__img {
+		width: 100%;
+		display: block;
+		margin: 0 0 10px;
+	}
+	&__title {
+		font-size: 18px;
+		line-height: (22/18);
+		font-weight: normal;
+		margin: 0 0 10px;
+		> a {
+			text-decoration: underline;
+		}
+	}
+	&__perex {
+		font-size: 14px;
+		margin: 0;
+	}
+	&__meta {
+		font-size: 12px;
+		line-height: (20/12);
+		color: #aaa;
+		margin: 10px 0 0;
+	}
+
+	@media (min-width: $mobileL) {
+		&__img {
+			width: 130px;
+			float: left;
+			margin: 0 20px 10px 0;
+		}
+	}
+
+	@media (min-width: $tablet) {
+		padding-left: 160px;
+		&__img {
+			margin: 0 0 0 -160px;
+		}
+	}
+}

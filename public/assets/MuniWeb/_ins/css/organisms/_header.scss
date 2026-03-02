@@ -1,0 +1,42 @@
+.ins-header{
+	@media(max-width: $tablet - 1){
+		margin-bottom: $mMarginSmall;
+		.header__wrap{
+			position: relative;
+			padding-bottom: 40px;
+		}
+		.header__side{
+			justify-content: space-between;
+			position: absolute;
+			left: 0;
+			right: 0;
+			bottom: 4px;
+		}
+		.header__search{
+			display: none;
+			position: absolute;
+			left: -15px;
+			right: -15px;
+			top: 100%;
+			margin-top: 5px;
+		}
+		.menu-primary__title{
+			top: -76px;
+		}
+	}
+	@media(max-width: $desktop - 1){
+		.menu-secondary{
+			display: none;
+		}
+	}
+	@media(min-width: $tablet){
+		.header__search{
+			max-width: 470px;
+		}
+	}
+	@media(min-width: $desktopWide){
+		.header__search{
+			padding-right: 50px;
+		}
+	}
+}

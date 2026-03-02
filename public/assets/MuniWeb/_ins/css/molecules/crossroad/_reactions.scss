@@ -1,0 +1,39 @@
+.ins-crossroad-reactions {
+	&__item {
+		@include clearfix();
+		background-color: #f2f2fd;
+		margin-bottom: 1px;
+		padding: 15px 20px 15px 52px;
+	}
+	&__avatar {
+		width: 32px;
+		height: 32px;
+		border-radius: 50%;
+		overflow: hidden;
+		margin: 0 0 0 -42px;
+		float: left;
+		img {
+			vertical-align: top;
+		}
+	}
+	&__name {
+		margin-bottom: 5px;
+	}
+	&__meta {
+		font-size: 13px;
+		color: #aaa;
+	}
+	&__content {
+		> :last-child {
+			margin-bottom: 0;
+		}
+	}
+	@media (min-width: $mobileL) {
+		&__item {
+			padding-left: 72px;
+		}
+		&__avatar {
+			margin-left: -52px;
+		}
+	}
+}

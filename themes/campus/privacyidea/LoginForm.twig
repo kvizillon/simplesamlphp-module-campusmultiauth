@@ -1,0 +1,145 @@
+{% set pagetitle = '{privacyidea:privacyidea:login_title_challenge}'|trans %}
+{% extends "base.twig" %}
+
+{% block preload %}
+<link rel="stylesheet" href="/{{ baseurlpath }}module.php/privacyidea/css/loginform.css" media="screen">
+<link rel="stylesheet" href="/{{ baseurlpath }}module.php/campusmultiauth/assets/privacyidea.css" media="screen">
+{% endblock %}
+
+{% block content %}
+{% if errorCode %}
+    <div class="message message--common message--common-error" role="alert">
+        <a href="#" class="message__close icon icon-times" title="{{ '{campusmultiauth:close}'|trans }}">
+            <span class="vhide">{{ '{campusmultiauth:close}'|trans }}</span>
+        </a>
+        <span class="message__icon icon icon-exclamation-triangle"></span>
+        <h2 class="message__title">{{ '{login:error_header}'|trans }}</h2>
+        <p class="message__desc">
+            {{ '{privacyidea:privacyidea:error}'|trans }}{% if errorCode %} {{ errorCode }}{% endif %}: {{ errorMessage }}
+        </p>
+    </div>
+{% endif %}
+
+    <div class="container">
+        <div class="login">
+            <form action="FormReceiver.php" method="POST" id="piLoginForm" name="piLoginForm" class="loginForm">
+                <div class="form-panel first valid" id="gaia_firstform">
+                    <div class="slide-out">
+                        <div class="input-wrapper focused">
+                            <div class="identifier-shown grid">
+                                {% if webauthnAvailable %}
+                                    <div class="grid__cell size--m--2-4">
+                                        <h2>{{ '{privacyidea:privacyidea:webauthn}'|trans }}</h2>
+                                        <p id="message" role="alert">
+                                            {{ messageOverride }}
+                                        </p>
+                                        <p>
+                                            <button id="useWebAuthnButton" name="useWebAuthnButton" class="btn btn-primary btn-s" type="button">
+                                                <span>{{ '{privacyidea:privacyidea:webauthn}'|trans }}</span>
+                                            </button>
+                                        </p>
+                                    </div>
+                                {% endif %}
+
+                                {% if otpAvailable %}
+                                    <div class="grid__cell size--m--2-4">
+                                        <h2>{{ '{privacyidea:privacyidea:otp}'|trans }}</h2>
+                                        <p>{{ '{campusmultiauth:otp_help}'|trans }}</p>
+                                        <div class="form-inline">
+                                            <p class="size--m--4-4 size--l--6-12">
+                                                <label for="otp" class="sr-only">{{ '{privacyidea:privacyidea:otp}'|trans }}</label>
+                                                <span class="inp-fix">
+                                                    <input id="otp" name="otp" tabindex="1" value="" class="text inp-text" autocomplete="one-time-code" type="number" inputmode="numeric" pattern="[0-9]{6,}" required placeholder="{{ otpHint }}"{% if otpAvailable is defined and otpAvailable and noAlternatives %} autofocus{% endif %} />
+                                                </span>
+                                            </p>
+                                            <p>
+                                                <button id="submitButton" tabindex="1" class="rc-button rc-button-submit btn btn-primary btn-s nowrap" type="submit" name="Submit">
+                                                    <span>{{ '{login:login_button}'|trans }}</span>
+                                                </button>
+                                            </p>
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                                {# Undefined index is suppressed and the default is used for these values #}
+                                <input id="mode" type="hidden" name="mode" value="otp" data-preferred="{{ mode }}"/>
+
+                                <input id="pushAvailable" type="hidden" name="pushAvailable" value="{% if pushAvailable %}true{% endif %}"/>
+
+                                <input id="otpAvailable" type="hidden" name="otpAvailable" value="{% if otpAvailable %}true{% endif %}"/>
+
+                                <input id="webAuthnSignRequest" type="hidden" name="webAuthnSignRequest"
+                                       value='{% if webAuthnSignRequest is defined %}{{ webAuthnSignRequest }}{% endif %}'/>
+
+                                <input id="u2fSignRequest" type="hidden" name="u2fSignRequest"
+                                       value='{% if u2fSignRequest is defined %}{{ u2fSignRequest }}{% endif %}'/>
+
+                                <input id="modeChanged" type="hidden" name="modeChanged" value=""/>
+                                <input id="step" type="hidden" name="step"
+                                       value="{% if step is defined and step %}{{ step }}{% else %}2{% endif %}"/>
+
+                                <input id="webAuthnSignResponse" type="hidden" name="webAuthnSignResponse" value=""/>
+                                <input id="u2fSignResponse" type="hidden" name="u2fSignResponse" value=""/>
+                                <input id="origin" type="hidden" name="origin" value=""/>
+                                <input id="loadCounter" type="hidden" name="loadCounter"
+                                       value="{% if loadCounter is defined and loadCounter %}{{ loadCounter }}{% else %}1{% endif %}"/>
+
+                                {# Additional input to persist the message #}
+                                <input type="hidden" name="message"
+                                       value="{% if message is defined %}{{ message }}{% endif %}"/>
+
+                                {# If enrollToken load QR Code #}
+                                {% if tokenQR is defined %}
+                                    {{ '{privacyidea:privacyidea:scan_token_qr}'|trans }}
+                                    <div class="tokenQR">
+                                        <img src="{{ tokenQR }}" />
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            {# Organizations #}
+                            {% if organizations is defined %}
+                                <div class="identifier-shown">
+                                    <label for="organization">{{ '{login:organization}'|trans }}</label>
+                                    <select id="organization" name="organization" tabindex="3">
+                                        {% for orgId, orgDesc in organizations %}
+                                            <option {% if selectedOrg is defined and orgId == selectedOrg %}selected {% endif %}value="{{ orgId }}">
+                                                {{ orgDesc|trans }}
+                                            </option>
+                                        {% endfor %}                                    
+                                    </select>
+                                </div>
+                            {% endif %}
+                        </div> <!-- focused -->
+                    </div> <!-- slide-out-->
+                </div> <!-- form-panel -->
+            </form>
+
+            {# Logout #}
+            {% if showLogout is defined and showLogout and LogoutURL is defined %}
+                <p>
+                    <a href="{{ LogoutURL }}">{{ '{status:logout}'|trans }}</a>
+                </p>
+            {% endif %}
+        </div>  <!-- End of login -->
+    </div>  <!-- End of container -->
+
+{% if links is defined and links %}
+    <ul class="links">
+        {% for l in links %}
+            <li><a href="{{ l['href'] }}">{{ l['text']|trans }}</a></li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+    <script src="/{{ baseurlpath }}module.php/privacyidea/js/pi-webauthn.js"></script>
+
+    <script src="/{{ baseurlpath }}module.php/privacyidea/js/u2f-api.js"></script>
+
+    <meta id="privacyidea-step" name="privacyidea-step" content="{{ step }}">
+
+    <meta id="privacyidea-translations" name="privacyidea-translations" content="{{ translations | json_encode }}">
+
+    <script src="/{{ baseurlpath }}module.php/privacyidea/js/loginform.js"></script>
+    <script src="/{{ baseurlpath }}module.php/campusmultiauth/assets/privacyidea.js"></script>
+{% endblock %}

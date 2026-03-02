@@ -1,0 +1,144 @@
+{% if configuration.priority is not defined %}
+    {% set configuration = configuration|merge({'priority': 'secondary'}) %}
+{% endif %}
+
+{% set counter = 0 %}
+
+<div class="list-group text-left idps-form-div d-none vhide">
+    <form action="{{ currentUrl }}" method="post">
+        <h4 id="searchbox-{{ component_index }}-label" class="{% if muni_jvs %}color-{{ configuration.priority }}{% else %}mb-3 text-{% if configuration.priority == 'primary' %}dark{% else %}muted{% endif %}{% endif %}">
+        {% if attribute(configuration.title, currentLanguage) is defined %}{{ attribute(configuration.title, currentLanguage) }}
+            {% elseif configuration.title is defined and configuration.title is iterable and configuration.title is not empty %}{{ configuration.title | first }}
+            {% elseif configuration.title is defined and configuration.title is not iterable %}{{ configuration.title }}
+            {% else %}{{ '{campusmultiauth:searchbox_title}'|trans }}
+            {% endif %}
+        </h4>
+        <input type="text" name="searchbox" aria-labelledby="searchbox-{{ component_index }}-label" id="searchbox-{{ component_index }}" value="" class="
+            {% if muni_jvs %}
+                inp-text js-suggest searchbox-input input-height selectized color-border-{{ configuration.priority }}
+            {% else %}
+                border border-2 input-height shadow-sm rounded border-{% if configuration.priority == 'primary' %}dark{% else %}muted{% endif %}
+            {% endif %}">
+
+        {% if prev_idps is not null %}
+            {% for idp in prev_idps %}
+                {% if idp.index == component_index and counter < 2 %}
+                    {% if muni_jvs %}
+                        <div class="box-vcards-list__item box-vcard--compact searchbox-result u-pr-0 u-pl-0 remembered-institution">
+                            <button class="preferred-idp color-border-{{ configuration.priority }}" type="submit" name="searchbox" value="{{ idp.entityid }}">
+                                <div class="box-vcards-list__inner u-pr-0 u-pl-0">
+                                    <p class="box-vcards-list__img center">
+                                        <img src="{{ idp.img }}" class="img-searchbox"/>
+                                    </p>
+                                    <div class="box-vcards-list__content u-pb-0 u-pt-0 u-pr-0 u-pl-10">
+                                        {% if attribute(idp.name, currentLanguage) is defined %}{{ attribute(idp.name, currentLanguage) }}{% elseif idp.name is iterable and idp.name is not empty %}idp.name|first{% else %}{{ '{campusmultiauth:undefined}'|trans }}{% endif %}
+                                    </div>
+                                    <div class="remove-option">
+                                        <span class="icon icon-times"></span>
+                                    </div>
+                                </div>
+                            </button>
+                        </div>
+                    {% else %}
+                        <button class="list-group-item list-group-item-action d-flex align-items-center rounded remembered-institution border-{% if configuration.priority == 'primary' %}dark{% else %}muted{% endif %}" type="submit" name="searchbox" value="{{ idp.entityid }}">
+                            <div class="full-width">
+                                <span class="mb-0">
+                                    <img src="{{ idp.img }}" class="img-searchbox" alt=""/>
+                                </span>
+                                <span class="margin-left-24">
+                                    {% if attribute(idp.name, currentLanguage) is defined %}{{ attribute(idp.name, currentLanguage) }}{% elseif idp.name is iterable and idp.name is not empty %}idp.name|first{% else %}{{ '{campusmultiauth:undefined}'|trans }}{% endif %}
+                                </span>
+                                <div class="remove-option">
+                                    <i class="fas fa-times"></i>
+                                </div>
+                            </div>
+                        </button>
+                    {% endif %}
+                    {% set counter = counter + 1 %}
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+
+        <input type="hidden" name="componentIndex" value="{{ component_index }}" />
+        <input type="hidden" name="authstate" value="{{ authstate }}" />
+        <input type="hidden" name="source" value="{{ sp_source_name }}" />
+    </form>
+</div>
+
+{% if attribute(configuration.placeholder, currentLanguage) is defined %}
+    {% set placeholder = attribute(configuration.placeholder, currentLanguage) %}
+{% elseif configuration.placeholder is defined and configuration.placeholder is iterable and configuration.placeholder is not empty %}
+    {% set placeholder =  configuration.placeholder | first %}
+{% elseif configuration.placeholder is defined and configuration.placeholder is not iterable %}
+    {% set placeholder = configuration.placeholder %}
+{% else %}
+    {% set placeholder = '{campusmultiauth:searchbox_placeholder}'|trans %}
+{% endif %}
+
+{% if idps == null or component_index != no_js_display_index %}
+    <div class="idps-form-nojs-div list-group text-left">
+        <label for="q-{{ component_index }}" class="{% if muni_jvs %}color-{{ configuration.priority }}{% else %}form-label text-{% if configuration.priority == 'primary' %}dark{% else %}muted{% endif %}{% endif %}">
+        {% if attribute(configuration.title, currentLanguage) is defined %}{{ attribute(configuration.title, currentLanguage) }}
+            {% elseif configuration.title is defined and configuration.title is iterable and configuration.title is not empty %}{{ configuration.title | first }}
+            {% elseif configuration.title is defined and configuration.title is not iterable %}{{ configuration.title }}
+            {% else %}{{ '{campusmultiauth:searchbox_title}'|trans }}
+            {% endif %}
+        </label>
+        <form class="idps-form-nojs form-inline" action="{{ currentUrl }}" method="post">
+        {% if muni_jvs %}
+                <p class="size--m--4-4 size--l--10-12">
+                    <span class="inp-fix">
+                        <input id="q-{{ component_index }}" class="inp-text" type="text" name="q" placeholder="{{ placeholder }}">
+                    </span>
+                </p>
+                <p>
+                    <button class="btn btn-primary btn-s nowrap full-width" type="submit">
+                        <span>{{ '{campusmultiauth:search_button}'|trans }}</span>
+                    </button>
+                </p>
+        {% else %}
+                <div class="input-group">
+                    <input id="q-{{ component_index }}" name="q" type="text" placeholder="{{ placeholder }}" class="form-control border border-2 border-{% if configuration.priority == 'primary' %}dark{% else %}muted{% endif %} input-height" aria-describedby="submit-search-{{ component_index }}">
+                    <button id="submit-search-{{ component_index }}" class="btn btn-{% if configuration.priority == 'primary' %}primary{% else %}secondary{% endif %}" type="submit">{{ '{campusmultiauth:search_button}'|trans }}</button>
+                </div>
+        {% endif %}
+
+            <input type="hidden" name="componentIndex" value="{{ component_index }}" />
+            <input type="hidden" name="currentLanguage" value="{{ currentLanguage }}" />
+            <input type="hidden" name="authstate" value="{{ authstate }}" />
+        </form>
+    </div>
+{% else %}
+    <div class="idps-form-nojs-div list-group div-nojs">
+        <form id="idps-{{ component_index }}" action="{{ currentUrl }}" method="post">
+            {% for idp in idps.items %}
+                {% if muni_jvs %}
+                    <button class="metaentry list-group-item" type="submit" name="idpentityid" value="{{ idp.idpentityid }}">
+                        <div class="box-vcards-list__item box-vcard--compact searchbox-result u-pr-0 u-pl-0">
+                            <div class="box-vcards-list__inner u-pr-0 u-pl-0">
+                                <p class="box-vcards-list__img center">
+                                    <img src="{{ idp.image }}" class="img-searchbox">
+                                </p>
+                                <div class="box-vcards-list__content u-pb-0 u-pt-0 u-pr-0 u-pl-10">
+                                    {{ idp.text }}
+                                </div>
+                            </div>
+                        </div>
+                    </button>
+                {% else %}
+                    <button class="list-group-item list-group-item-action d-flex align-items-center text-left" type="submit" name="idpentityid" value="{{ idp.idpentityid }}">
+                        <span class="mb-0">
+                            <img src="{{ idp.image }}" class="img-searchbox" alt=""/>
+                        </span>
+                        <span class="margin-left-24">
+                            {{ idp.text }}
+                        </span>
+                    </button>
+                {% endif %}
+            {% endfor %}
+
+            <input type="hidden" name="authstate" value="{{ authstate }}" />
+            <input type="hidden" name="source" value="{{ sp_source_name }}" />
+        </form>
+    </div>
+{% endif %}

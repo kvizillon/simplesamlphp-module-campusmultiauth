@@ -1,0 +1,47 @@
+{% if configuration.number_shown is not defined %}
+    {% set configuration = configuration|merge({'number_shown': 5}) %}
+{% endif %}
+
+{% if configuration.priority is not defined %}
+    {% set configuration = configuration|merge({'priority': 'secondary'}) %}
+{% endif %}
+
+<form id="external-{{ component_index }}" class="external text-left" action="{{ currentUrl }}" method="post" name="g">
+
+    <h4 class="mb-3 {% if muni_jvs %}color-{{ configuration.priority }}{% elseif configuration.priority == 'primary' %}text-dark{% else %}text-muted{% endif %}" >
+        {% if attribute(configuration.title, currentLanguage) is defined %}{{ attribute(configuration.title, currentLanguage) }}
+        {% elseif configuration.title is defined and configuration.title is iterable and configuration.title is not empty %}{{ configuration.title | first }}
+        {% elseif configuration.title is defined and configuration.title is not iterable %}{{ configuration.title }}
+        {% else %}{{ '{campusmultiauth:individualIdentities_title}'|trans }}
+        {% endif %}
+    </h4>
+
+    {% set index = 0 %}
+    {% for idp in configuration.identities %}
+        {% if idpsToShow is not defined or idp.upstream_idp in idpsToShow %}
+            <div class="{% if muni_jvs %}margin-bottom-12{% endif %}{% if index >= configuration.number_shown %} idp-hidden d-none vhide{% endif %}">
+                <button class="btn-individual-identity btn {% if muni_jvs %}btn-primary btn-border color-{{ configuration.priority }} hover-none-{{ configuration.priority }}{% else %}btn-light shadow-sm {% if configuration.priority == 'primary' %}border-dark text-dark{% else %}border-muted text-muted{% endif %} border-2{% endif %}" type="submit" name="idpentityid" value="{{ idp.upstream_idp }}">
+                    {% if muni_jvs %}<span class="no-uppercase color-{{ configuration.priority }} individual-identity-span-wrap">{% endif %}
+                        <img class="individual-identity-logo img-searchbox{% if not muni_jvs %} border-end border-2 border-{% if configuration.priority == 'primary' %}dark{% else %}muted{% endif %}{% endif %}" {% if idp.background_color is defined %}style="background-color: {{ idp.background_color }}"{% endif %} src="{{ idp.logo }}" alt=""/>
+                        <span class="idp-text">{{ '{campusmultiauth:sign_in_with}'|trans }}{{ " " }}{% if attribute(idp.name, currentLanguage) is defined %}{{ attribute(idp.name, currentLanguage) }}
+                            {% elseif idp.name is defined and idp.name is iterable and idp.name is not empty %}{{ idp.name | first }}
+                            {% else %}{{ idp.name }}
+                            {% endif %}</span>
+                    {% if muni_jvs %}</span>{% endif %}
+                </button>
+            </div>
+            {% set index = index + 1 %}
+        {% endif %}
+    {% endfor %}
+
+    <input type="hidden" name="authstate" value="{{ authstate }}" />
+    <input type="hidden" name="source" value="{{ sp_source_name }}" />
+</form>
+
+{% if configuration.identities|length > configuration.number_shown %}
+    <div class="text-center">
+        <button class="btn more-options {% if muni_jvs %}btn-primary btn-s btn-white hover-none-primary{% else %}btn-outline-{{ configuration.priority }} btn-lg text-center border-0 text-decoration-underline{% endif %}" type="button" data-targetform="external-{{ component_index }}">
+            <span class="no-uppercase {% if muni_jvs %}u-pt-0 u-pr-0 u-pb-0 u-pl-0{% else %}p-0{% endif %}">{{ '{campusmultiauth:more_options}'|trans }}{% if muni_jvs %}<span class="btn-icon icon icon-angle-down"></span>{% else %} <i class="fas fa-arrow-down"></i>{% endif %}</span>
+        </button>
+    </div>
+{% endif %}

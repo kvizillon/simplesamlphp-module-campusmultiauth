@@ -1,0 +1,10 @@
+<dialog role="dialog" id="refresh-required-dialog" data-timeout="{{ refresh_dialog_timeout }}">
+    <p role="alert">
+        {{ '{campusmultiauth:timeout_dialog}'|trans }}
+    </p>
+    <p{% if muni_jvs %} class="btn-wrap"{% endif %}>
+        <a href="{{ restart_url }}" class="btn btn-primary{% if muni_jvs %} btn-s{% endif %}">
+            <span class="{% if muni_jvs %}upper{% else %}text-uppercase{% endif %}">{{ '{campusmultiauth:refresh}'|trans }}</span>
+        </a>
+    </p>
+</dialog>
