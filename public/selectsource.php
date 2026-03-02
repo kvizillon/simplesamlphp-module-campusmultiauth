@@ -226,7 +226,7 @@ if (!empty($timeoutDialogConfig)) {
 // </timeout dialog>
 
 $globalConfig = Configuration::getInstance();
-$t = new Template($globalConfig, 'campusmultiauth:selectsource.php');
+$t = new Template($globalConfig, 'campusmultiauth:selectsource');
 
 array_key_exists('wrongUserPass', $_REQUEST) ? $t->data['wrongUserPass'] = true : $t->data['wrongUserPass'] = false;
 $t->data['authstate'] = $authStateId;
