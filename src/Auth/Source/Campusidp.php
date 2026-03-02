@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SimpleSAML\Module\campusmultiauth\Auth\Source;
 
 use Exception;
+use SimpleSAML\Assert\Assert;
 use SimpleSAML\Auth;
 use SimpleSAML\Auth\Source;
 use SimpleSAML\Auth\State;
@@ -17,127 +18,124 @@ use SimpleSAML\Module;
 use SimpleSAML\Module\core\Auth\UserPassBase;
 use SimpleSAML\Module\ldap\Auth\Ldap;
 use SimpleSAML\Session;
-use SimpleSAML\Utils;
+use SimpleSAML\Utils\HTTP;
 use Transliterator;
 
+/**
+ * Authentication source that allows users to choose between a username/password
+ * login and an external SAML/SP source on a single login page.
+ *
+ * This module also supports AARC IdP hinting and advanced metadata filtering.
+ *
+ * @package SimpleSAML\Module\campusmultiauth\Auth\Source
+ */
 class Campusidp extends Source
 {
-    public const AUTHID = '\SimpleSAML\Module\campusidp\Auth\Source\Campusidp.AuthId';
+    // State and session keys
+    public const string AUTHID = '\SimpleSAML\Module\campusidp\Auth\Source\Campusidp.AuthId';
+    public const string STAGEID_USERPASS = '\SimpleSAML\Module\core\Auth\UserPassBase.state';
+    public const string SOURCESID = '\SimpleSAML\Module\campusidp\Auth\Source\Campusidp.SourceId';
+    public const string SESSION_SOURCE = 'campusmultiauth:selectedSource';
+    public const string USER_PASS_SOURCE_NAME = 'userPassSourceName';
+    public const string SP_SOURCE_NAME = 'spSourceName';
 
-    public const STAGEID_USERPASS = '\SimpleSAML\Module\core\Auth\UserPassBase.state';
+    // Cookie related constants
+    public const string COOKIE_PREFIX = 'campusidp_';
+    public const string COOKIE_PREVIOUS_IDPS = 'previous_idps';
+    private const int COOKIE_LIFETIME = 7776000; // 90 days in seconds
 
-    public const SOURCESID = '\SimpleSAML\Module\campusidp\Auth\Source\Campusidp.SourceId';
+    // IdP hinting constants
+    public const string IDPHINT = 'idphint';
+    public const string AARC_IDP_HINT = 'aarc_idp_hint';
+    public const string AARC_DISCOVERY_HINT = 'aarc_discovery_hint';
+    public const string AARC_DISCOVERY_HINT_URI = 'aarc_discovery_hint_uri';
 
-    public const SESSION_SOURCE = 'campusmultiauth:selectedSource';
+    // Metadata filtering constants
+    public const string INCLUDE = 'include';
+    public const string EXCLUDE = 'exclude';
+    public const string ALL_OF = 'all_of';
+    public const string ANY_OF = 'any_of';
+    public const string ENTITY_CATEGORY = 'entity_category';
+    public const string ASSURANCE_CERTIFICATION = 'assurance_certification';
+    public const string REGISTRATION_AUTHORITY = 'registration_authority';
+    public const string ENTITYID = 'entityid';
+    public const string CONTAINS = 'contains';
+    public const string EQUALS = 'equals';
+    public const string MATCHES = 'matches';
 
-    public const USER_PASS_SOURCE_NAME = 'userPassSourceName';
+    private const string ENTITY_CATEGORY_ATTR_NAME = 'http://macedir.org/entity-category';
+    private const string ASSURANCE_CERTIFICATION_ATTR_NAME = 'urn:oasis:names:tc:SAML:attribute:assurance-certification';
+    public const int IDP_HINT_BUTTONS_LIMIT = 5;
 
-    public const SP_SOURCE_NAME = 'spSourceName';
+    /** @var array<int, array{source: string, AuthnContextClassRef: array}> */
+    private array $sources;
 
-    public const COOKIE_PREVIOUS_IDPS = 'previous_idps';
+    private string $userPassSourceName;
+    private string $spSourceName;
 
-    public const COOKIE_PREFIX = 'campusidp_';
-
-    public const IDP_HINT_BUTTONS_LIMIT = 5;
-
-    // idp hinting
-
-    public const IDPHINT = 'idphint';
-
-    public const AARC_IDP_HINT = 'aarc_idp_hint';
-
-    public const AARC_DISCOVERY_HINT = 'aarc_discovery_hint';
-
-    public const AARC_DISCOVERY_HINT_URI = 'aarc_discovery_hint_uri';
-
-    public const INCLUDE = 'include';
-
-    public const EXCLUDE = 'exclude';
-
-    public const ALL_OF = 'all_of';
-
-    public const ANY_OF = 'any_of';
-
-    public const ENTITY_CATEGORY = 'entity_category';
-
-    public const ASSURANCE_CERTIFICATION = 'assurance_certification';
-
-    public const REGISTRATION_AUTHORITY = 'registration_authority';
-
-    public const ENTITYID = 'entityid';
-
-    public const CONTAINS = 'contains';
-
-    public const EQUALS = 'equals';
-
-    public const MATCHES = 'matches';
-
-    public const ENTITY_CATEGORY_ATTR_NAME = 'http://macedir.org/entity-category';
-
-    public const ASSURANCE_CERTIFICATION_ATTR_NAME = 'urn:oasis:names:tc:SAML:attribute:assurance-certification';
-
-    private $sources;
-
-    private $userPassSourceName;
-
-    private $spSourceName;
-
-    public function __construct($info, $config)
+    /**
+     * Constructor for this authentication source.
+     *
+     * @param array $info Information about this authentication source.
+     * @param array $config Configuration for this authentication source.
+     */
+    public function __construct(array $info, array $config)
     {
         parent::__construct($info, $config);
 
-        $this->sources = [];
+        $this->userPassSourceName = $config['userPassSource']['name'] ?? 'campus-userpass';
+        $this->spSourceName = $config['spSource']['name'] ?? 'default-sp';
 
-        $this->userPassSourceName = !empty($config['userPassSource']['name'])
-            ? $config['userPassSource']['name'] : 'campus-userpass';
+        $userPassClassRef = $this->normalizeAuthnContextClassRef($config['userPassSource']['AuthnContextClassRef'] ?? []);
+        $spClassRef = $this->normalizeAuthnContextClassRef($config['spSource']['AuthnContextClassRef'] ?? []);
 
-        $userPassClassRef = [];
-        if (!empty($config['userPassSource']['AuthnContextClassRef'])) {
-            $ref = $config['userPassSource']['AuthnContextClassRef'];
-            if (is_string($ref)) {
-                $userPassClassRef = [$ref];
-            } else {
-                $userPassClassRef = $ref;
-            }
-        }
-
-        $this->sources[] = [
-            'source' => $this->userPassSourceName,
-            'AuthnContextClassRef' => $userPassClassRef,
-        ];
-
-        $this->spSourceName = !empty($config['spSource']['name']) ? $config['spSource']['name'] : 'default-sp';
-
-        $spClassRef = [];
-        if (!empty($config['spSource']['AuthnContextClassRef'])) {
-            $ref = $config['spSource']['AuthnContextClassRef'];
-            if (is_string($ref)) {
-                $spClassRef = [$ref];
-            } else {
-                $spClassRef = $ref;
-            }
-        }
-
-        $this->sources[] = [
-            'source' => $this->spSourceName,
-            'AuthnContextClassRef' => $spClassRef,
+        $this->sources = [
+            [
+                'source' => $this->userPassSourceName,
+                'AuthnContextClassRef' => $userPassClassRef,
+            ],
+            [
+                'source' => $this->spSourceName,
+                'AuthnContextClassRef' => $spClassRef,
+            ],
         ];
     }
 
-    public function authenticate(&$state)
+    /**
+     * Normalize AuthnContextClassRef to an array.
+     *
+     * @param mixed $ref The reference to normalize.
+     * @return array The normalized array.
+     */
+    private function normalizeAuthnContextClassRef(mixed $ref): array
     {
+        if (is_string($ref)) {
+            return [$ref];
+        }
+        if (is_array($ref)) {
+            return $ref;
+        }
+        return [];
+    }
+
+    /**
+     * Start authentication process. Redirects to the source selection page.
+     *
+     * @param array &$state The state array.
+     * @return void
+     */
+    public function authenticate(array &$state): void
+    {
+        // Check for various IdP hints in the request
         if (array_key_exists(self::AARC_IDP_HINT, $_REQUEST)) {
             $state[self::AARC_IDP_HINT] = $_REQUEST[self::AARC_IDP_HINT];
         }
-
         if (array_key_exists(self::AARC_DISCOVERY_HINT, $_REQUEST)) {
             $state[self::AARC_DISCOVERY_HINT] = $_REQUEST[self::AARC_DISCOVERY_HINT];
         }
-
         if (array_key_exists(self::AARC_DISCOVERY_HINT_URI, $_REQUEST)) {
             $state[self::AARC_DISCOVERY_HINT_URI] = $_REQUEST[self::AARC_DISCOVERY_HINT_URI];
         }
-
         if (array_key_exists(self::IDPHINT, $_REQUEST)) {
             $state[self::IDPHINT] = $_REQUEST[self::IDPHINT];
         }
@@ -147,43 +145,41 @@ class Campusidp extends Source
         $state[self::USER_PASS_SOURCE_NAME] = $this->userPassSourceName;
         $state[self::SP_SOURCE_NAME] = $this->spSourceName;
 
-        // Save the $state array, so that we can restore if after a redirect
+        // Save the state for the next step
         $id = State::saveState($state, self::STAGEID_USERPASS);
 
-        /* Redirect to the select source page. We include the identifier of the
-         * saved state array as a parameter to the login form
-         */
         $url = Module::getModuleURL('campusmultiauth/selectsource.php');
-        $params = [
-            'AuthState' => $id,
-        ];
+        $params = ['AuthState' => $id];
 
-        Utils\HTTP::redirectTrustedURL($url, $params);
-
-        // The previous function never returns, so this code is never executed
-        assert(false);
+        (new HTTP())->redirectTrustedURL($url, $params);
     }
 
-    public static function delegateAuthentication($authId, $state)
+    /**
+     * Delegate authentication to a specific source.
+     *
+     * @param string $authId The ID of the authentication source to use.
+     * @param array $state The current state array.
+     * @return void
+     * @throws Exception If the authentication source is invalid.
+     */
+    public static function delegateAuthentication(string $authId, array $state): void
     {
-        $as = Auth\Source::getById($authId);
-        $valid_sources = array_map(function ($src) {
-            return $src['source'];
-        }, $state[self::SOURCESID]);
-        if ($as === null || !in_array($authId, $valid_sources, true)) {
+        $as = Source::getById($authId);
+        $validSources = array_map(fn($src) => $src['source'], $state[self::SOURCESID]);
+
+        if ($as === null || !in_array($authId, $validSources, true)) {
             throw new Exception('Invalid authentication source: ' . $authId);
         }
 
-        // Save the selected authentication source for the logout process.
+        // Store the selected source for logout
         $session = Session::getSessionFromRequest();
         $session->setData(self::SESSION_SOURCE, $state[self::AUTHID], $authId, Session::DATA_TIMEOUT_SESSION_END);
 
         try {
+            // Handle username/password login if the source is a UserPassBase subclass
             if (
-                !empty($_POST['username']) && !empty($_POST['password']) && is_subclass_of(
-                    $as,
-                    '\SimpleSAML\Module\core\Auth\UserPassBase'
-                )
+                !empty($_POST['username']) && !empty($_POST['password']) &&
+                is_subclass_of($as, UserPassBase::class)
             ) {
                 $state[UserPassBase::AUTHID] = $authId;
 
@@ -193,86 +189,128 @@ class Campusidp extends Source
                         $_POST['username'],
                         $_POST['password']
                     );
-                } catch (\SimpleSAML\Error\Error $e) {
+                } catch (Error\Error $e) {
                     if ($e->getMessage() === 'WRONGUSERPASS') {
                         $id = State::saveState($state, self::STAGEID_USERPASS);
                         $url = Module::getModuleURL('campusmultiauth/selectsource.php');
-                        $params = [
+                        (new HTTP())->redirectTrustedURL($url, [
                             'AuthState' => $id,
                             'wrongUserPass' => true,
-                        ];
-
-                        Utils\HTTP::redirectTrustedURL($url, $params);
+                        ]);
                     } else {
                         throw $e;
                     }
                 }
             } else {
+                // Delegate to the chosen authentication source
                 $as->authenticate($state);
             }
         } catch (Error\Exception $e) {
-            Auth\State::throwException($state, $e);
+            State::throwException($state, $e);
         } catch (Exception $e) {
-            $e = new UnserializableException($e);
-            Auth\State::throwException($state, $e);
+            $e = new UnserializableException($e->getMessage(), $e->getCode(), $e);
+            State::throwException($state, $e);
         }
-        Auth\Source::completeAuth($state);
+
+        Source::completeAuth($state);
     }
 
-    public static function getCookie($name)
+    /**
+     * Get a cookie value.
+     *
+     * @param string $name The name of the cookie (without prefix).
+     * @return string|null The cookie value, or null if not set.
+     */
+    public static function getCookie(string $name): ?string
     {
-        $prefixedName = self::COOKIE_PREFIX . $name;
-        if (array_key_exists($prefixedName, $_COOKIE)) {
-            return $_COOKIE[$prefixedName];
-        }
-        return null;
+        return $_COOKIE[self::COOKIE_PREFIX . $name] ?? null;
     }
 
-    public static function setCookie($name, $value)
+    /**
+     * Set a cookie.
+     *
+     * @param string $name The name of the cookie (without prefix).
+     * @param string|null $value The value to set, or null to delete.
+     * @return void
+     */
+    public static function setCookie(string $name, ?string $value): void
     {
         $prefixedName = self::COOKIE_PREFIX . $name;
 
         $params = [
-            // we save the cookies for 90 days
-            'lifetime' => (60 * 60 * 24 * 90),
-            // the base path for cookies. This should be the installation directory for SimpleSAMLphp
+            'lifetime' => self::COOKIE_LIFETIME,
             'path' => Configuration::getInstance()->getBasePath(),
             'httponly' => false,
+            'secure' => true,
+            'samesite' => 'Lax',
         ];
 
-        Utils\HTTP::setCookie($prefixedName, $value, $params, false);
+        (new HTTP())->setCookie($prefixedName, $value, $params, false);
     }
 
-    public static function getMostSquareLikeImg($idpentry)
+    /**
+     * Extract the most square-like logo from IdP metadata.
+     *
+     * @param array $idpentry The IdP metadata entry.
+     * @return string The URL of the most square logo, or an empty string.
+     */
+    public static function getMostSquareLikeImg(array $idpentry): string
     {
-        if (!empty($idpentry['UIInfo']['Logo'])) {
-            if (count($idpentry['UIInfo']['Logo']) === 1) {
-                $item['image'] = $idpentry['UIInfo']['Logo'][0]['url'];
-            } else {
-                $logoSizeRatio = 1; // impossible value
-                $candidateLogoUrl = null;
-
-                foreach ($idpentry['UIInfo']['Logo'] as $logo) {
-                    $ratio = abs($logo['height'] - $logo['width']) / ($logo['height'] + $logo['width']);
-
-                    if ($ratio < $logoSizeRatio) { // then we found more square-like logo
-                        $logoSizeRatio = $ratio;
-                        $candidateLogoUrl = $logo['url'];
-                    }
-                }
-
-                $item['image'] = $candidateLogoUrl;
-            }
-
-            return $item['image'];
+        if (empty($idpentry['UIInfo']['Logo'])) {
+            return '';
         }
-        return '';
+
+        $logos = $idpentry['UIInfo']['Logo'];
+        if (count($logos) === 1) {
+            return $logos[0]['url'];
+        }
+
+        $bestRatio = 1.0;
+        $bestUrl = '';
+
+        foreach ($logos as $logo) {
+            $width = $logo['width'] ?? 1;
+            $height = $logo['height'] ?? 1;
+            if ($width <= 0 || $height <= 0) {
+                continue;
+            }
+            $ratio = abs($height - $width) / ($height + $width);
+            if ($ratio < $bestRatio) {
+                $bestRatio = $ratio;
+                $bestUrl = $logo['url'];
+            }
+        }
+
+        return $bestUrl;
     }
 
-    public static function getHintedIdps($hint)
+    /**
+     * Get IdPs based on a hint.
+     *
+     * @param array $hint The hint array.
+     * @return array|null An array of entity IDs, or null.
+     */
+    public static function getHintedIdps(array $hint): ?array
     {
+        $discoveryHint = null;
+
         if (array_key_exists(self::AARC_DISCOVERY_HINT_URI, $hint)) {
-            $discoveryHint = json_decode(file_get_contents($hint[self::AARC_DISCOVERY_HINT_URI]), true);
+            $url = $hint[self::AARC_DISCOVERY_HINT_URI];
+            // Validate URL to prevent SSRF
+            if (!self::isAllowedHintUrl($url)) {
+                Logger::warning('Blocked SSRF attempt for URL: ' . $url);
+                return null;
+            }
+            $content = file_get_contents($url);
+            if ($content === false) {
+                Logger::warning('Could not fetch discovery hint URI: ' . $url);
+                return null;
+            }
+            $discoveryHint = json_decode($content, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                Logger::warning('Invalid JSON from discovery hint URI.');
+                return null;
+            }
         } elseif (array_key_exists(self::AARC_DISCOVERY_HINT, $hint)) {
             $discoveryHint = $hint[self::AARC_DISCOVERY_HINT];
         } else {
@@ -287,13 +325,13 @@ class Campusidp extends Source
         if (array_key_exists(self::INCLUDE, $discoveryHint)) {
             if (empty($discoveryHint[self::INCLUDE])) {
                 return [];
-            } else {
-                foreach ($discoveryHint[self::INCLUDE] as $key => $value) {
-                    if ($key === self::ALL_OF) {
-                        $idps = array_merge($idps, self::getAllOfIdps($value, $metadata));
-                    } elseif ($key === self::ANY_OF) {
-                        $idps = array_merge($idps, self::getAnyOfIdps($value, $metadata));
-                    }
+            }
+
+            foreach ($discoveryHint[self::INCLUDE] as $key => $value) {
+                if ($key === self::ALL_OF) {
+                    $idps = array_merge($idps, self::getAllOfIdps($value, $metadata));
+                } elseif ($key === self::ANY_OF) {
+                    $idps = array_merge($idps, self::getAnyOfIdps($value, $metadata));
                 }
             }
         } else {
@@ -312,10 +350,51 @@ class Campusidp extends Source
                 }
             }
         }
+
         return $idps;
     }
 
-    public static function getAllOfIdps($claim, $metadata, $type = null)
+    /**
+     * Check if a URL is allowed for fetching hints.
+     *
+     * @param string $url The URL to check.
+     * @return bool True if allowed, false otherwise.
+     */
+    private static function isAllowedHintUrl(string $url): bool
+    {
+        $parsed = parse_url($url);
+        if ($parsed === false || !isset($parsed['host'])) {
+            return false;
+        }
+
+        // Get allowed domains from configuration
+        $config = Configuration::getOptionalConfig('module_campusmultiauth.php');
+        $allowedDomains = $config->getArray('allowed_hint_domains', []);
+
+        // If no domains configured, reject all external URLs (only allow local files? but file:// may be disabled)
+        if (empty($allowedDomains)) {
+            // Allow only if scheme is not http/https (e.g., file, but better to reject for security)
+            return false;
+        }
+
+        foreach ($allowedDomains as $domain) {
+            if ($parsed['host'] === $domain) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Get IdPs matching ALL criteria.
+     *
+     * @param array $claim The claim array.
+     * @param array $metadata All metadata.
+     * @param string|null $type Optional type hint.
+     * @return array An array of entity IDs.
+     */
+    public static function getAllOfIdps(array $claim, array $metadata, ?string $type = null): array
     {
         $result = [];
         $isFirst = true;
@@ -325,44 +404,28 @@ class Campusidp extends Source
                 foreach ($array as $key => $value) {
                     switch ($key) {
                         case self::ALL_OF:
-                            $isFirst ?
-                                $result = array_merge($result, self::getAllOfIdps($value, $metadata)) :
-                                $result = array_intersect($result, self::getAllOfIdps($value, $metadata));
-                            $isFirst = false;
+                            $matched = self::getAllOfIdps($value, $metadata);
                             break;
                         case self::ANY_OF:
-                            $isFirst ?
-                                $result = array_merge($result, self::getAnyOfIdps($value, $metadata)) :
-                                $result = array_intersect($result, self::getAnyOfIdps($value, $metadata));
-                            $isFirst = false;
+                            $matched = self::getAnyOfIdps($value, $metadata);
                             break;
                         case self::ENTITY_CATEGORY:
-                            $isFirst ?
-                                $result = array_merge($result, self::getEntityCategoryIdps($value, $metadata)) :
-                                $result = array_intersect($result, self::getEntityCategoryIdps($value, $metadata));
-                            $isFirst = false;
+                            $matched = self::getEntityCategoryIdps($value, $metadata);
                             break;
                         case self::ASSURANCE_CERTIFICATION:
-                            $isFirst ?
-                                $result = array_merge($result, self::getAssuranceCertificationIdps($value, $metadata)) :
-                                $result = array_intersect(
-                                    $result,
-                                    self::getAssuranceCertificationIdps($value, $metadata)
-                                );
-                            $isFirst = false;
-
+                            $matched = self::getAssuranceCertificationIdps($value, $metadata);
                             break;
                         case self::REGISTRATION_AUTHORITY:
-                            $isFirst ?
-                                $result = array_merge($result, self::getRegistrationAuthorityIdps($value, $metadata)) :
-                                $result = array_intersect(
-                                    $result,
-                                    self::getRegistrationAuthorityIdps($value, $metadata)
-                                );
-                            $isFirst = false;
+                            $matched = self::getRegistrationAuthorityIdps($value, $metadata);
                             break;
                         default:
-                            break;
+                            $matched = [];
+                    }
+                    if ($isFirst) {
+                        $result = $matched;
+                        $isFirst = false;
+                    } else {
+                        $result = array_intersect($result, $matched);
                     }
                 }
             }
@@ -370,31 +433,19 @@ class Campusidp extends Source
             foreach ($claim as $item) {
                 switch ($type) {
                     case self::ENTITY_CATEGORY:
-                        $isFirst ?
-                            $result = array_merge(
-                                $result,
-                                self::getEntityCategoryIdps([self::CONTAINS => $item], $metadata)
-                            ) :
-                            $result = array_intersect(
-                                $result,
-                                self::getEntityCategoryIdps([self::CONTAINS => $item], $metadata)
-                            );
-                        $isFirst = false;
+                        $matched = self::getEntityCategoryIdps([self::CONTAINS => $item], $metadata);
                         break;
                     case self::ASSURANCE_CERTIFICATION:
-                        $isFirst ?
-                            $result = array_merge(
-                                $result,
-                                self::getAssuranceCertificationIdps([self::CONTAINS => $item], $metadata)
-                            ) :
-                            $result = array_intersect(
-                                $result,
-                                self::getAssuranceCertificationIdps([self::CONTAINS => $item], $metadata)
-                            );
-                        $isFirst = false;
+                        $matched = self::getAssuranceCertificationIdps([self::CONTAINS => $item], $metadata);
                         break;
                     default:
-                        break;
+                        $matched = [];
+                }
+                if ($isFirst) {
+                    $result = $matched;
+                    $isFirst = false;
+                } else {
+                    $result = array_intersect($result, $matched);
                 }
             }
         }
@@ -402,218 +453,218 @@ class Campusidp extends Source
         return array_unique($result);
     }
 
-    public static function getAnyOfIdps($claim, $metadata, $type = null)
+    /**
+     * Get IdPs matching ANY criteria.
+     *
+     * @param array $claim The claim array.
+     * @param array $metadata All metadata.
+     * @param string|null $type Optional type hint.
+     * @return array An array of entity IDs.
+     */
+    public static function getAnyOfIdps(array $claim, array $metadata, ?string $type = null): array
     {
         $result = [];
 
         if ($type === null) {
             foreach ($claim as $array) {
                 foreach ($array as $key => $value) {
-                    switch ($key) {
-                        case self::ALL_OF:
-                            $result = array_merge($result, self::getAllOfIdps($value, $metadata));
-                            break;
-                        case self::ANY_OF:
-                            $result = array_merge($result, self::getAnyOfIdps($value, $metadata));
-                            break;
-                        case self::ENTITY_CATEGORY:
-                            $result = array_merge($result, self::getEntityCategoryIdps($value, $metadata));
-                            break;
-                        case self::ASSURANCE_CERTIFICATION:
-                            $result = array_merge($result, self::getAssuranceCertificationIdps($value, $metadata));
-                            break;
-                        case self::REGISTRATION_AUTHORITY:
-                            $result = array_merge($result, self::getRegistrationAuthorityIdps($value, $metadata));
-                            break;
-                        case self::ENTITYID:
-                            $result = array_merge($result, self::getEntityidIdp($value, $metadata));
-                            break;
-                        default:
-                            break;
-                    }
+                    $result = array_merge($result, match ($key) {
+                        self::ALL_OF => self::getAllOfIdps($value, $metadata),
+                        self::ANY_OF => self::getAnyOfIdps($value, $metadata),
+                        self::ENTITY_CATEGORY => self::getEntityCategoryIdps($value, $metadata),
+                        self::ASSURANCE_CERTIFICATION => self::getAssuranceCertificationIdps($value, $metadata),
+                        self::REGISTRATION_AUTHORITY => self::getRegistrationAuthorityIdps($value, $metadata),
+                        self::ENTITYID => self::getEntityidIdp($value, $metadata),
+                        default => [],
+                    });
                 }
             }
         } else {
             foreach ($claim as $item) {
-                switch ($type) {
-                    case self::ENTITY_CATEGORY:
-                        $result = array_merge(
-                            $result,
-                            self::getEntityCategoryIdps([self::CONTAINS => $item], $metadata)
-                        );
-                        break;
-                    case self::ASSURANCE_CERTIFICATION:
-                        $result = array_merge(
-                            $result,
-                            self::getAssuranceCertificationIdps([self::CONTAINS => $item], $metadata)
-                        );
-                        break;
-                    case self::REGISTRATION_AUTHORITY:
-                        $result = array_merge(
-                            $result,
-                            self::getRegistrationAuthorityIdps([self::EQUALS => $item], $metadata)
-                        );
-                        break;
-                    case self::ENTITYID:
-                        $result = array_merge(
-                            $result,
-                            self::getEntityidIdp([self::EQUALS => $item], $metadata)
-                        );
-                        break;
-                    default:
-                        break;
-                }
+                $result = array_merge($result, match ($type) {
+                    self::ENTITY_CATEGORY => self::getEntityCategoryIdps([self::CONTAINS => $item], $metadata),
+                    self::ASSURANCE_CERTIFICATION => self::getAssuranceCertificationIdps([self::CONTAINS => $item], $metadata),
+                    self::REGISTRATION_AUTHORITY => self::getRegistrationAuthorityIdps([self::EQUALS => $item], $metadata),
+                    self::ENTITYID => self::getEntityidIdp([self::EQUALS => $item], $metadata),
+                    default => [],
+                });
             }
         }
 
         return array_unique($result);
     }
 
-    public static function getEntityCategoryIdps($claim, $metadata)
+    /**
+     * Get IdPs based on entity category.
+     *
+     * @param array $claim The claim.
+     * @param array $metadata All metadata.
+     * @return array An array of entity IDs.
+     */
+    public static function getEntityCategoryIdps(array $claim, array $metadata): array
     {
         $result = [];
 
-        switch (array_key_first($claim)) {
+        $firstKey = array_key_first($claim);
+        switch ($firstKey) {
             case self::ALL_OF:
-                $result = array_merge(
-                    $result,
-                    self::getAllOfIdps($claim[self::ALL_OF], $metadata, self::ENTITY_CATEGORY)
-                );
+                $result = self::getAllOfIdps($claim[self::ALL_OF], $metadata, self::ENTITY_CATEGORY);
                 break;
             case self::ANY_OF:
-                $result = array_merge(
-                    $result,
-                    self::getAnyOfIdps($claim[self::ANY_OF], $metadata, self::ENTITY_CATEGORY)
-                );
+                $result = self::getAnyOfIdps($claim[self::ANY_OF], $metadata, self::ENTITY_CATEGORY);
                 break;
             case self::CONTAINS:
                 foreach ($metadata as $entityid => $idpMetadata) {
-                    $entityCategories = self::getIdpEntityCategories($idpMetadata);
-
-                    if (self::contains($claim[self::CONTAINS], $entityCategories)) {
+                    $categories = self::getIdpEntityCategories($idpMetadata);
+                    if (self::contains($claim[self::CONTAINS], $categories)) {
                         $result[] = $entityid;
                     }
                 }
-                break;
-            default:
                 break;
         }
 
         return $result;
     }
 
-    public static function getAssuranceCertificationIdps($claim, $metadata)
+    /**
+     * Get IdPs based on assurance certification.
+     *
+     * @param array $claim The claim.
+     * @param array $metadata All metadata.
+     * @return array An array of entity IDs.
+     */
+    public static function getAssuranceCertificationIdps(array $claim, array $metadata): array
     {
         $result = [];
 
-        switch (array_key_first($claim)) {
+        $firstKey = array_key_first($claim);
+        switch ($firstKey) {
             case self::ALL_OF:
-                $result = array_merge(
-                    $result,
-                    self::getAllOfIdps($claim[self::ALL_OF], $metadata, self::ASSURANCE_CERTIFICATION)
-                );
+                $result = self::getAllOfIdps($claim[self::ALL_OF], $metadata, self::ASSURANCE_CERTIFICATION);
                 break;
             case self::ANY_OF:
-                $result = array_merge(
-                    $result,
-                    self::getAnyOfIdps($claim[self::ANY_OF], $metadata, self::ASSURANCE_CERTIFICATION)
-                );
+                $result = self::getAnyOfIdps($claim[self::ANY_OF], $metadata, self::ASSURANCE_CERTIFICATION);
                 break;
             case self::CONTAINS:
                 foreach ($metadata as $entityid => $idpMetadata) {
-                    $assuranceCertifications = self::getIdpAssuranceCertifications($idpMetadata);
-
-                    if (self::contains($claim[self::CONTAINS], $assuranceCertifications)) {
+                    $certifications = self::getIdpAssuranceCertifications($idpMetadata);
+                    if (self::contains($claim[self::CONTAINS], $certifications)) {
                         $result[] = $entityid;
                     }
                 }
-                break;
-            default:
                 break;
         }
 
         return $result;
     }
 
-    public static function getRegistrationAuthorityIdps($claim, $metadata)
+    /**
+     * Get IdPs based on registration authority.
+     *
+     * @param array $claim The claim.
+     * @param array $metadata All metadata.
+     * @return array An array of entity IDs.
+     */
+    public static function getRegistrationAuthorityIdps(array $claim, array $metadata): array
     {
         $result = [];
 
-        switch (array_key_first($claim)) {
+        $firstKey = array_key_first($claim);
+        switch ($firstKey) {
             case self::ANY_OF:
-                $result = array_merge(
-                    $result,
-                    self::getAnyOfIdps($claim[self::ANY_OF], $metadata, self::REGISTRATION_AUTHORITY)
-                );
+                $result = self::getAnyOfIdps($claim[self::ANY_OF], $metadata, self::REGISTRATION_AUTHORITY);
                 break;
             case self::EQUALS:
+                $value = $claim[self::EQUALS];
                 foreach ($metadata as $entityid => $idpMetadata) {
-                    if (
-                        !empty($idpMetadata['RegistrationInfo']['registrationAuthority']) &&
-                        self::equals($idpMetadata['RegistrationInfo']['registrationAuthority'], $claim[self::EQUALS])
-                    ) {
+                    $ra = $idpMetadata['RegistrationInfo']['registrationAuthority'] ?? null;
+                    if ($ra !== null && self::equals($ra, $value)) {
                         $result[] = $entityid;
                     }
                 }
                 break;
             case self::MATCHES:
+                $pattern = $claim[self::MATCHES];
                 foreach ($metadata as $entityid => $idpMetadata) {
-                    if (
-                        !empty($idpMetadata['RegistrationInfo']['registrationAuthority']) &&
-                        self::matches($idpMetadata['RegistrationInfo']['registrationAuthority'], $claim[self::MATCHES])
-                    ) {
+                    $ra = $idpMetadata['RegistrationInfo']['registrationAuthority'] ?? null;
+                    if ($ra !== null && self::matches($ra, $pattern)) {
                         $result[] = $entityid;
                     }
                 }
-                break;
-            default:
                 break;
         }
 
         return $result;
     }
 
-    public static function getEntityidIdp($claim, $metadata)
+    /**
+     * Get IdPs based on entity ID.
+     *
+     * @param array $claim The claim.
+     * @param array $metadata All metadata.
+     * @return array An array of entity IDs.
+     */
+    public static function getEntityidIdp(array $claim, array $metadata): array
     {
         $result = [];
 
-        switch (array_key_first($claim)) {
+        $firstKey = array_key_first($claim);
+        switch ($firstKey) {
             case self::ANY_OF:
-                $result = array_merge($result, self::getAnyOfIdps($claim[self::ANY_OF], $metadata, self::ENTITYID));
+                $result = self::getAnyOfIdps($claim[self::ANY_OF], $metadata, self::ENTITYID);
                 break;
             case self::EQUALS:
-                if (self::contains($claim[self::EQUALS], array_keys($metadata))) {
-                    $result[] = $claim[self::EQUALS];
+                $entityid = $claim[self::EQUALS];
+                if (isset($metadata[$entityid])) {
+                    $result[] = $entityid;
                 }
                 break;
             case self::MATCHES:
+                $pattern = $claim[self::MATCHES];
                 foreach (array_keys($metadata) as $entityid) {
-                    if (self::matches($entityid, $claim[self::MATCHES])) {
+                    if (self::matches($entityid, $pattern)) {
                         $result[] = $entityid;
                     }
                 }
-                break;
-            default:
                 break;
         }
 
         return $result;
     }
 
-    public static function getIdpEntityCategories($idpMetadata)
+    /**
+     * Get entity categories for an IdP.
+     *
+     * @param array $idpMetadata IdP metadata.
+     * @return array Entity categories.
+     */
+    public static function getIdpEntityCategories(array $idpMetadata): array
     {
         return self::getAttrValues($idpMetadata, self::ENTITY_CATEGORY_ATTR_NAME);
     }
 
-    public static function getIdpAssuranceCertifications($idpMetadata)
+    /**
+     * Get assurance certifications for an IdP.
+     *
+     * @param array $idpMetadata IdP metadata.
+     * @return array Assurance certifications.
+     */
+    public static function getIdpAssuranceCertifications(array $idpMetadata): array
     {
         return self::getAttrValues($idpMetadata, self::ASSURANCE_CERTIFICATION_ATTR_NAME);
     }
 
     /**
-     * @deprecated
+     * Extract attribute values from metadata entityDescriptor XML.
+     *
+     * @param array $idpMetadata IdP metadata.
+     * @param string $attrName The attribute name to extract.
+     * @return array The extracted values.
+     *
+     * @deprecated This method relies on XML parsing and may be inefficient.
+     *             Consider a more robust metadata handling solution.
      */
-    public static function getAttrValues($idpMetadata, $attrName)
+    public static function getAttrValues(array $idpMetadata, string $attrName): array
     {
         $result = [];
 
@@ -621,14 +672,32 @@ class Campusidp extends Source
             return $result;
         }
 
-        $xmlStr = base64_decode($idpMetadata['entityDescriptor']);
-        $xml = @simplexml_load_string($xmlStr); // temporary solution
+        $xmlStr = base64_decode($idpMetadata['entityDescriptor'], true);
+        if ($xmlStr === false) {
+            Logger::warning('Could not base64 decode entityDescriptor.');
+            return $result;
+        }
+
+        // Disable external entity loading to prevent XXE attacks
+        $old = libxml_disable_entity_loader(true);
+        $xml = simplexml_load_string($xmlStr);
+        libxml_disable_entity_loader($old);
+
+        if ($xml === false) {
+            Logger::warning('Could not parse entityDescriptor XML.');
+            return $result;
+        }
 
         $xml->registerXPathNamespace('md', 'urn:oasis:names:tc:SAML:2.0:metadata');
         $xml->registerXPathNamespace('mdattr', 'urn:oasis:names:tc:SAML:metadata:attribute');
         $xml->registerXPathNamespace('saml', 'urn:oasis:names:tc:SAML:2.0:assertion');
 
-        $attrs = $xml->xpath('//saml:Attribute[@Name="' . $attrName . '"]/saml:AttributeValue');
+        $xpathQuery = sprintf('//saml:Attribute[@Name="%s"]/saml:AttributeValue', $attrName);
+        $attrs = $xml->xpath($xpathQuery);
+        if ($attrs === false) {
+            return $result;
+        }
+
         foreach ($attrs as $attr) {
             $result[] = $attr->__toString();
         }
@@ -636,33 +705,68 @@ class Campusidp extends Source
         return $result;
     }
 
-    public static function contains($needle, $haystack)
+    /**
+     * Check if a value is in an array.
+     *
+     * @param mixed $needle The value to find.
+     * @param array $haystack The array to search.
+     * @return bool True if found, false otherwise.
+     */
+    public static function contains(mixed $needle, array $haystack): bool
     {
-        return in_array($needle, $haystack);
+        return in_array($needle, $haystack, true);
     }
 
-    public static function equals($string1, $string2)
+    /**
+     * Check if two strings are equal.
+     *
+     * @param string $string1 First string.
+     * @param string $string2 Second string.
+     * @return bool True if equal, false otherwise.
+     */
+    public static function equals(string $string1, string $string2): bool
     {
         return $string1 === $string2;
     }
 
-    public static function matches($string, $pattern)
+    /**
+     * Check if a string matches a regular expression pattern.
+     *
+     * @param string $string The string to test.
+     * @param string $pattern The regex pattern.
+     * @return bool True if matches, false otherwise.
+     */
+    public static function matches(string $string, string $pattern): bool
     {
         return preg_match($pattern, $string) === 1;
     }
 
-    public static function isIdpInCookie($idps, $entityid)
+    /**
+     * Check if an IdP is in the cookie list.
+     *
+     * @param array $idps The list of IdPs from the cookie.
+     * @param string $entityid The entity ID to check.
+     * @return bool True if found, false otherwise.
+     */
+    public static function isIdpInCookie(array $idps, string $entityid): bool
     {
         foreach ($idps as $idp) {
-            if ($idp[self::ENTITYID] === $entityid) {
+            if (($idp[self::ENTITYID] ?? null) === $entityid) {
                 return true;
             }
         }
-
         return false;
     }
 
-    public static function findSearchboxesToDisplay($hint, $config, $state)
+    /**
+     * Find which searchbox components should be displayed based on hints.
+     *
+     * @param mixed $hint The hint.
+     * @param array $config The module configuration.
+     * @param array|null $state The state array.
+     * @return array Indices of searchbox components to display.
+     */
+    public static function findSearchboxesToDisplay($hint, array $config, $state): array
     {
         $result = [];
 
@@ -680,7 +784,7 @@ class Campusidp extends Source
                             ) . '&skipMatching=true' . '&index=' . $i
                         )
                     );
-                } elseif (array_key_exists(self::AARC_DISCOVERY_HINT_URI, $state)) {
+                } elseif (array_key_exists(self::AARC_DISCOVERY_HINT_URI, (array)$state)) {
                     curl_setopt(
                         $ch,
                         CURLOPT_URL,
@@ -717,7 +821,14 @@ class Campusidp extends Source
         return $result;
     }
 
-    public static function findIndividualIdentitiesToDisplay($hintedIdps, $config)
+    /**
+     * Find which individual identities components should be displayed based on hinted IdPs.
+     *
+     * @param array $hintedIdps The hinted IdPs.
+     * @param array $config The module configuration.
+     * @return array Indices of individual identities components to display.
+     */
+    public static function findIndividualIdentitiesToDisplay(array $hintedIdps, array $config): array
     {
         $result = [];
 
@@ -741,8 +852,21 @@ class Campusidp extends Source
         return $result;
     }
 
-    public static function getOrPositions($searchboxesToDisplay, $individualIdentitiesToDisplay, $idphint, $config)
-    {
+    /**
+     * Get positions of "or" separators.
+     *
+     * @param array $searchboxesToDisplay Searchbox indices to display.
+     * @param array $individualIdentitiesToDisplay Individual identities indices to display.
+     * @param array $idphint IdP hint.
+     * @param array $config Module configuration.
+     * @return array Positions.
+     */
+    public static function getOrPositions(
+        array $searchboxesToDisplay,
+        array $individualIdentitiesToDisplay,
+        array $idphint,
+        array $config
+    ): array {
         $result = [];
 
         $componentsToDisplay = [];
@@ -787,7 +911,14 @@ class Campusidp extends Source
         return $result;
     }
 
-    public static function getIdpsMatchedBySearchTerm($metadata, $searchTerm)
+    /**
+     * Filter metadata by search term.
+     *
+     * @param array $metadata All metadata.
+     * @param string $searchTerm The search term.
+     * @return array Filtered metadata.
+     */
+    public static function getIdpsMatchedBySearchTerm(array $metadata, string $searchTerm): array
     {
         $filteredMetadata = [];
 
@@ -909,19 +1040,25 @@ class Campusidp extends Source
         return $entries[0][$urlAttrName][0];
     }
 
-    public function logout(&$state)
+    /**
+     * Logout from the selected source.
+     *
+     * @param array &$state The state array.
+     * @return void
+     * @throws Exception If the source is invalid.
+     */
+    public function logout(array &$state): void
     {
-        assert(is_array($state));
+        Assert::isArray($state, 'State must be an array.');
 
-        // Get the source that was used to authenticate
         $session = Session::getSessionFromRequest();
         $authId = $session->getData(self::SESSION_SOURCE, $this->authId);
 
-        $source = Auth\Source::getById($authId);
+        $source = Source::getById($authId);
         if ($source === null) {
             throw new Exception('Invalid authentication source during logout: ' . $authId);
         }
-        // Then, do the logout on it
+
         $source->logout($state);
     }
 }
