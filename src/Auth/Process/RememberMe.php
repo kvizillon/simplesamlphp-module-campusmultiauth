@@ -259,16 +259,16 @@ class RememberMe extends ProcessingFilter
      */
     public static function getOtherUsernameLink($authState)
     {
-        $link = HTTP::getSelfURL();
-        $link = HTTP::addURLParameters($link, [
+        $link = (new HTTP())->getSelfURL();
+        $link = (new HTTP())->addURLParameters($link, [
             self::CLEAR_USERNAME_PARAM => self::CLEAR_USERNAME_VALUE,
         ]);
-
-        return HTTP::addURLParameters($link, [
+    
+        return (new HTTP())->addURLParameters($link, [
             'AuthState' => $authState,
         ]);
     }
-
+    
     /**
      * Get info about the browser, which should not change too often.
      */
