@@ -1,5 +1,5 @@
 msgid "{campusmultiauth:wrong_user_pass}"
-msgstr "Wrong username or password!"
+msgstr "Неверное имя пользователя или пароль!"
 
 msgid "{campusmultiauth:password}"
 msgstr "Пароль"
@@ -8,76 +8,76 @@ msgid "{campusmultiauth:login_title}"
 msgstr "Логин"
 
 msgid "{campusmultiauth:remember}"
-msgstr "Remember me"
+msgstr "Запомнить меня"
 
 msgid "{campusmultiauth:login}"
-msgstr "Log in"
+msgstr "Войти"
 
 msgid "{campusmultiauth:sign_in_with}"
-msgstr "Log in with"
+msgstr "Войти через"
 
 msgid "{campusmultiauth:sign_in_another_identity}"
-msgstr "Login via institution or social network"
+msgstr "Войти через"
 
 msgid "{campusmultiauth:or}"
-msgstr "or"
+msgstr "или"
 
 msgid "{campusmultiauth:lang_selection}"
-msgstr "Language selection"
+msgstr "Выбор языка"
 
 msgid "{campusmultiauth:mobile_lang_selection}"
-msgstr "Mobile language selection"
+msgstr "Выбор языка"
 
 msgid "{campusmultiauth:username_label}"
-msgstr "Username"
+msgstr "Имя пользователя"
 
 msgid "{campusmultiauth:username_placeholder}"
-msgstr "Username"
+msgstr "Введите имя пользователя"
 
 msgid "{campusmultiauth:password_label}"
 msgstr "Пароль"
 
 msgid "{campusmultiauth:password_placeholder}"
-msgstr "Пароль"
+msgstr "Введите пароль"
 
 msgid "{campusmultiauth:searchbox_title}"
-msgstr "Log in via another institution"
+msgstr "Войти через другой источник учетных записей"
 
 msgid "{campusmultiauth:searchbox_placeholder}"
-msgstr "Type the name of institution"
+msgstr "Введите имя источника учетных записей"
 
 msgid "{campusmultiauth:individualIdentities_title}"
-msgstr "Log in via institution or social network"
+msgstr "Войти через внешние учетные записи "
 
 msgid "{campusmultiauth:more_options}"
-msgstr "More options"
+msgstr "Больше вариантов"
 
 msgid "{campusmultiauth:wrong_username_or_password}"
-msgstr "Wrong username or password."
+msgstr "Неверное имя пользователя или пароль!"
 
 msgid "{campusmultiauth:search_button}"
-msgstr "Search"
+msgstr "Поиск"
 
 msgid "{campusmultiauth:undefined}"
-msgstr "undefined"
+msgstr "неопределенный"
 
 msgid "{campusmultiauth:localLogin_title}"
-msgstr "Login with username and password"
+msgstr "Войти с помощью имени пользователя и пароля"
 
 msgid "{campusmultiauth:localLogin_capslock}"
-msgstr "Warning! Caps lock is ON."
+msgstr "Внимание! Включен CapsLock."
 
 msgid "{campusmultiauth:close}"
-msgstr "close"
+msgstr "закрыть"
 
 msgid "{campusmultiauth:otp_help}"
-msgstr "Enter a one time code, e.g. from a TOTP app."
+msgstr "Введите Оne Time Code из TOTP приложения."
 
 msgid "{campusmultiauth:timeout_dialog}"
-msgstr "Because of inactivity, it is needed to refresh the page."
+msgstr "Из-за неактивности необходимо обновить страницу."
 
 msgid "{campusmultiauth:refresh}"
-msgstr "refresh"
+msgstr "обновить"
 
 msgid "{campusmultiauth:different_account}"
-msgstr "Use a different account to log in"
+msgstr "Используйте другую учетную запись для входа"
