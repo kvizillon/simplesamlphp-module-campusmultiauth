@@ -5,7 +5,7 @@
 {% set counter = 0 %}
 
 <div class="list-group text-left idps-form-div d-none vhide">
-    <form action="{{ currentUrl }}" method="post">
+    <form action="{{ moduleURL('campusmultiauth/selectsource.php') }}" method="post">
         <h4 id="searchbox-{{ component_index }}-label" class="{% if muni_jvs %}color-{{ configuration.priority }}{% else %}mb-3 text-{% if configuration.priority == 'primary' %}dark{% else %}muted{% endif %}{% endif %}">
         {% if attribute(configuration.title, currentLanguage) is defined %}{{ attribute(configuration.title, currentLanguage) }}
             {% elseif configuration.title is defined and configuration.title is iterable and configuration.title is not empty %}{{ configuration.title | first }}
